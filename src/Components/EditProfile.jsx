@@ -13,6 +13,7 @@ const EditProfile = ({ user }) => {
   const [gender, setGender] = useState(user.gender || "");
   const [about, setAbout] = useState(user.about || "");
   const [error, setError] = useState("");
+  const [toaster, setToaster] = useState(false);
   const dispatch = useDispatch();
 
   const saveChanges = async () => {
@@ -24,6 +25,10 @@ const EditProfile = ({ user }) => {
       );
       console.log(res.data);
       dispatch(addUser(res.data));
+      setTimeout(() => {
+        setToaster(false);
+      }, 3000);
+      setToaster(true);
     } catch (err) {
       setError(err?.response?.data?.message || "Something went wrong");
     }
@@ -31,6 +36,19 @@ const EditProfile = ({ user }) => {
   return (
     <div className="flex justify-center items-center gap-5">
       <div>
+        <div
+          className={`fixed top-5 mx-auto transition-all duration-700 ease-in-out transform
+            ${
+              toaster
+                ? "opacity-100 translate-y-0 z-10"
+                : "opacity-0 -translate-y-2"
+            }
+          `}
+        >
+          <div className="alert alert-success shadow-lg w-80">
+            <span>Changes saved successfully ✅</span>
+          </div>
+        </div>
         <div className="flex justify-center mt-10">
           <div className="card bg-base-200 w-96 shadow-sm">
             <div className="card-body">
@@ -106,6 +124,7 @@ const EditProfile = ({ user }) => {
           </div>
         </div>
       </div>
+
       <UserCard user={{ firstName, lastName, age, gender, photoUrl, about }} />
     </div>
   );
