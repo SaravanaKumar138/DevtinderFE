@@ -22,7 +22,7 @@ const Requests = () => {
   useEffect(() => {
     fetchRequest();
   }, []);
-  if (requests) return <h1 className="flex justify-center text-2xl font-bold m-5">No Connection Request</h1>
+  if (!requests || requests.length == 0) return <h1 className="flex justify-center text-2xl font-bold m-5">No Connection Request</h1>
   return requests && <div>
     {
         requests.map(request => (
