@@ -4,7 +4,6 @@ import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import { useNavigate } from "react-router-dom";
 import { url } from "../utils/constants";
-import { motion } from "framer-motion";
 
 const Login = () => {
   const [emailId, setEmailId] = useState("gosling.java@gmail.com");
@@ -27,7 +26,6 @@ const Login = () => {
       navigate("/feed");
     } catch (err) {
       setError(err?.response?.data || "Login failed. Try again.");
-      console.error("Login error:", err);
     }
   };
 
@@ -47,12 +45,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 30 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="card bg-base-100 w-full max-w-md shadow-xl border border-base-300"
-      >
+      <div className="card bg-base-100 w-full max-w-md shadow-xl border border-base-300 p-6 transition-all duration-300">
         <div className="card-body">
           <h2 className="card-title justify-center text-2xl font-semibold mb-4 text-primary">
             {isLogin ? "Welcome Back 👋" : "Create an Account ✨"}
@@ -137,7 +130,7 @@ const Login = () => {
             </p>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
