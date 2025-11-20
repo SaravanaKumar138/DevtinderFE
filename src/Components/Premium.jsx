@@ -1,0 +1,99 @@
+import React from "react";
+import { url } from "../utils/constants";
+import axios from "axios";
+
+const Premium = () => {
+  const handleClick = async (plan) => {
+    try {
+      const order = await axios.post(
+        url + "/payment/create",
+        { plan },
+        { withCredentials: true }
+      );
+      const {amount, currency, notes, keyId, orderId} = order.data;
+      const options = {
+        key: keyId, // Replace with your Razorpay key_id
+        amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+        currency,
+        name: "DevTinder",
+        description: "Connect to other Developers",
+        order_id: orderId, // This is the order_id created in the backend// Your success URL
+        prefill: {
+          name: notes.firstName+ " "+notes.lastName,
+          email: notes.emailId,
+          contact: "9999999999",
+        },
+        theme: {
+          color: "#F37254",
+        },
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+      console.log(response);
+    } catch (error) {
+      console.error("Error initiating payment:", error);
+    }
+  };
+  return (
+    <div className="w-full min-h-screen flex items-center justify-center px-6">
+      <div className="flex flex-col lg:flex-row items-center gap-10 w-full max-w-6xl">
+        {/* Silver */}
+        <div className="w-full bg-[#0f172a] border border-blue-900/40 hover:border-blue-400 rounded-2xl p-10 shadow-lg hover:shadow-blue-500/30 hover:-translate-y-1 transition-all duration-300">
+          <h2 className="text-3xl font-semibold text-blue-300 text-center mb-5">
+            Silver Membership
+          </h2>
+
+          <ul className="text-gray-300 space-y-3 text-center mb-8">
+            <li className="hover:text-blue-300 transition">✔ Blue Tick</li>
+            <li className="hover:text-blue-300 transition">
+              ✔ 100 Requests / Day
+            </li>
+          </ul>
+
+          <div className="text-center text-blue-400 text-4xl font-bold mb-6">
+            ₹99 <span className="text-lg text-blue-300">/month</span>
+          </div>
+
+          <button
+            className="w-full py-3 rounded-xl btn btn-primary text-white font-semibold transition"
+            onClick={() => handleClick("silver")}
+          >
+            Choose Silver
+          </button>
+        </div>
+
+        <div className="text-gray-400 text-lg font-semibold">OR</div>
+
+        {/* Gold */}
+        <div className="w-full bg-[#0f172a] border border-blue-900/40 hover:border-blue-400 rounded-2xl p-10 shadow-lg hover:shadow-blue-400/40 hover:-translate-y-1 transition-all duration-300">
+          <h2 className="text-3xl font-semibold text-blue-200 text-center mb-5">
+            Gold Membership
+          </h2>
+
+          <ul className="text-gray-300 space-y-3 text-center mb-8">
+            <li className="hover:text-blue-200 transition">
+              ✔ 200 Requests / Day
+            </li>
+            <li className="hover:text-blue-200 transition">✔ Blue Tick</li>
+            <li className="hover:text-blue-200 transition">
+              ✔ Priority Matching
+            </li>
+          </ul>
+
+          <div className="text-center text-blue-300 text-4xl font-bold mb-6">
+            ₹199 <span className="text-lg text-blue-200">/month</span>
+          </div>
+
+          <button
+            className="w-full py-3 rounded-xl btn btn-secondary text-slate-900 font-semibold transition"
+            onClick={() => handleClick("gold")}
+          >
+            Choose Gold
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Premium;

@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import { useNavigate } from "react-router-dom";
 import { url } from "../utils/constants";
+import { motion } from "framer-motion";
 
 const Login = () => {
   const [emailId, setEmailId] = useState("gosling.java@gmail.com");
@@ -19,17 +20,13 @@ const Login = () => {
     try {
       const response = await axios.post(
         url + "/auth/login",
-        {
-          emailId,
-          password,
-        },
+        { emailId, password },
         { withCredentials: true }
       );
-
       dispatch(addUser(response.data));
-      return navigate("/feed");
+      navigate("/feed");
     } catch (err) {
-      setError(err?.response?.data);
+      setError(err?.response?.data || "Login failed. Try again.");
       console.error("Login error:", err);
     }
   };
@@ -42,78 +39,105 @@ const Login = () => {
         { withCredentials: true }
       );
       dispatch(addUser(response.data));
-      return navigate("/profile");
+      navigate("/profile");
     } catch (err) {
-       setError(err?.response?.data);
+      setError(err?.response?.data || "Sign up failed. Try again.");
     }
   };
+
   return (
-    <div className="flex justify-center mt-10">
-      <div className="card bg-base-200 w-96 shadow-sm">
+    <div className="min-h-screen flex items-center justify-center bg-base-200">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="card bg-base-100 w-full max-w-md shadow-xl border border-base-300"
+      >
         <div className="card-body">
-          <h2 className="card-title justify-center">
-            {isLogin ? "Login" : "SignUp"}
+          <h2 className="card-title justify-center text-2xl font-semibold mb-4 text-primary">
+            {isLogin ? "Welcome Back 👋" : "Create an Account ✨"}
           </h2>
+
           {!isLogin && (
-            <>
+            <div className="grid grid-cols-2 gap-4">
               <fieldset className="fieldset">
-                <legend className="fieldset-legend">FirstName</legend>
+                <legend className="fieldset-legend text-sm text-gray-500">
+                  First Name
+                </legend>
                 <input
                   type="text"
-                  className="input"
-                  placeholder="Type here"
+                  className="input input-bordered w-full"
+                  placeholder="John"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                 />
               </fieldset>
               <fieldset className="fieldset">
-                <legend className="fieldset-legend">LastName</legend>
+                <legend className="fieldset-legend text-sm text-gray-500">
+                  Last Name
+                </legend>
                 <input
                   type="text"
-                  className="input"
-                  placeholder="Type here"
+                  className="input input-bordered w-full"
+                  placeholder="Doe"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                 />
               </fieldset>
-            </>
+            </div>
           )}
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Email Id</legend>
+
+          <fieldset className="fieldset mt-2">
+            <legend className="fieldset-legend text-sm text-gray-500">
+              Email Address
+            </legend>
             <input
-              type="text"
-              className="input"
-              placeholder="Type here"
+              type="email"
+              className="input input-bordered w-full"
+              placeholder="you@example.com"
               value={emailId}
               onChange={(e) => setEmailId(e.target.value)}
             />
           </fieldset>
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Password</legend>
+
+          <fieldset className="fieldset mt-2">
+            <legend className="fieldset-legend text-sm text-gray-500">
+              Password
+            </legend>
             <input
               type="password"
-              className="input"
-              placeholder="Type here"
+              className="input input-bordered w-full"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </fieldset>
-          <p className="text-red-600">{error}</p>
-          <div className="card-actions flex items-center mx-auto">
+
+          {error && (
+            <p className="text-red-600 text-center mt-3 text-sm font-medium">
+              ⚠ {error}
+            </p>
+          )}
+
+          <div className="card-actions mt-5 flex flex-col items-center">
             <button
-              className="btn btn-primary p-5 "
+              className="btn btn-primary w-full py-2 text-lg"
               onClick={isLogin ? handleLogin : handleSignUp}
             >
-              {isLogin ? "Login" : "SignUp"}
+              {isLogin ? "Login" : "Sign Up"}
             </button>
-            <p className="cursor-pointer" onClick={() => setIsLogin(!isLogin)}>
+
+            <p
+              className="mt-3 text-sm text-gray-600 cursor-pointer hover:text-primary"
+              onClick={() => setIsLogin(!isLogin)}
+            >
               {isLogin
-                ? "New User ? Sign Up Here"
-                : "Existing User? Login Here"}
+                ? "New user? Create an account"
+                : "Already have an account? Login here"}
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

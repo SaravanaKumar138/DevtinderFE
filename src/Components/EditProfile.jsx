@@ -24,7 +24,7 @@ const EditProfile = ({ user }) => {
         { withCredentials: true }
       );
       console.log(res.data);
-      dispatch(addUser(res.data));
+      dispatch(addUser(res.data.data));
       setTimeout(() => {
         setToaster(false);
       }, 3000);
