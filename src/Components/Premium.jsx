@@ -1,7 +1,7 @@
 import React from "react";
 import { url } from "../utils/constants";
 import axios from "axios";
-
+import Razorpay from "razorpay";
 const Premium = () => {
   const handleClick = async (plan) => {
     try {
