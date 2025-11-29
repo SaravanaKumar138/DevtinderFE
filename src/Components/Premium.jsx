@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { url } from "../utils/constants";
 import axios from "axios";
 
 const Premium = () => {
   const [isPremiumUser, setIsPremiumUser] = React.useState(false);
+  useEffect(() => {
+    verifyPremiumUser();
+  },[]);
   const handleClick = async (plan) => {
     try {
       const order = await axios.post(
