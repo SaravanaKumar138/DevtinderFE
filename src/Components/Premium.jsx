@@ -3,6 +3,7 @@ import { url } from "../utils/constants";
 import axios from "axios";
 
 const Premium = () => {
+  const [isPremiumUser, setIsPremiumUser] = React.useState(false);
   const handleClick = async (plan) => {
     try {
       const order = await axios.post(
@@ -26,6 +27,7 @@ const Premium = () => {
         theme: {
           color: "#F37254",
         },
+        handler: verifyPremiumUser,
       };
       const rzp = new window.Razorpay(options);
       rzp.open();
@@ -34,8 +36,20 @@ const Premium = () => {
       console.error("Error initiating payment:", error);
     }
   };
+
+  const verifyPremiumUser = async () => {
+  try {
+    const res = await axios.get(url+"/payment/premium/verify", {withCredentials: true});
+    if (res.data.isPremium) {
+      setIsPremiumUser(true);
+    }
+  }
+  catch(err) {
+
+  }
+  }
   return (
-    <div className="w-full min-h-screen flex items-center justify-center px-6">
+  !isPremiumUser ?   <div className="w-full min-h-screen flex items-center justify-center px-6">
       <div className="flex flex-col lg:flex-row items-center gap-10 w-full max-w-6xl">
         {/* Silver */}
         <div className="w-full bg-[#0f172a] border border-blue-900/40 hover:border-blue-400 rounded-2xl p-10 shadow-lg hover:shadow-blue-500/30 hover:-translate-y-1 transition-all duration-300">
@@ -92,7 +106,7 @@ const Premium = () => {
           </button>
         </div>
       </div>
-    </div>
+    </div> : "You are a Premium User Now!"
   );
 };
 
