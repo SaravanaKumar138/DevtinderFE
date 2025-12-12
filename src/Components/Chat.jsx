@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useParams, useLocation } from "react-router-dom"; // Added useLocation to get connection name
+import { useParams, useLocation } from "react-router-dom";
 import createSocketConnection from "../utils/socket";
 import { useSelector } from "react-redux";
 import axios from "axios";
@@ -7,7 +7,6 @@ import { url } from "../utils/constants";
 
 const Chat = () => {
   const { targetUserId } = useParams();
-  // Use useLocation to get the connection details passed from ConnectionCard
   const location = useLocation();
   const targetUserFirstName = location.state?.connection?.firstName || "User";
 
@@ -18,51 +17,51 @@ const Chat = () => {
   const firstName = user?.firstName;
   const messagesEndRef = useRef(null);
 
+  const socketRef = useRef(null); // Socket reference
+
+  // Fetch initial messages
   const fetchChatMessages = async () => {
     try {
-      const chat = await axios.get(url + "/chat/" + targetUserId, {
+      const chat = await axios.get(`${url}/chat/${targetUserId}`, {
         withCredentials: true,
       });
-      console.log(chat?.data?.messages);
-      const chatMessages = chat?.data?.messages.map((msg) => {
-        return {
-          senderUserId: msg?.senderId?._id,
-          firstName: msg?.senderId?.firstName,
-          lastName: msg?.senderId?.lastName,
-          text: msg.text,
-          // Format the timestamp to HH:MM:SS
-          timestamp: new Date(msg?.createdAt).toTimeString().split(" ")[0],
-        };
-      });
+      const chatMessages = chat?.data?.messages.map((msg) => ({
+        senderUserId: msg?.senderId?._id,
+        firstName: msg?.senderId?.firstName,
+        lastName: msg?.senderId?.lastName,
+        text: msg.text,
+        timestamp: new Date(msg?.createdAt).toTimeString().split(" ")[0],
+      }));
       setMessages(chatMessages);
     } catch (err) {
       console.error("Failed to fetch chat messages:", err);
     }
   };
 
-  const sendMesage = () => {
-    if (!newMessage.trim()) return; // Prevent sending empty messages
-    const socket = createSocketConnection();
-    const now = new Date();
+  // Send message
+  const sendMessage = () => {
+    if (!newMessage.trim() || !socketRef.current) return;
 
-    // Optimistically add the message to the UI before receiving confirmation
+    const now = new Date();
     const newOptimisticMessage = {
       senderUserId: userId,
-      firstName: firstName,
+      firstName,
       text: newMessage,
       timestamp: now.toTimeString().split(" ")[0],
-      isOptimistic: true, // Marker for styling (optional)
+      isOptimistic: true,
     };
+
     setMessages((prev) => [...prev, newOptimisticMessage]);
 
-    socket.emit("sendMessage", {
+    // Emit message using the same socket
+    socketRef.current.emit("sendMessage", {
       firstName,
       userId,
       targetUserId,
       text: newMessage,
-      // You might want to send the client-side timestamp as well
       timestamp: now.toISOString(),
     });
+
     setNewMessage("");
   };
 
@@ -71,43 +70,44 @@ const Chat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Fetch initial messages
-  useEffect(() => {
-    fetchChatMessages();
-  }, [targetUserId]);
-
-  // Handle socket connection and incoming messages
+  // Initialize socket connection
   useEffect(() => {
     if (!userId) return;
-    const socket = createSocketConnection();
+
+    socketRef.current = createSocketConnection();
+    const socket = socketRef.current;
+
     socket.emit("joinChat", { firstName, userId, targetUserId });
 
-    socket.on("messageRecieved", ({ firstName, text, timestamp }) => {
-       if (senderId === userId) return;
-      console.log(firstName + " " + text);
-      const formattedTimestamp = new Date(timestamp)
-        .toTimeString()
-        .split(" ")[0];
-      setMessages((prev) => [
-        ...prev,
-        {
-          firstName,
-          text,
-          timestamp: formattedTimestamp,
-          senderUserId: targetUserId,
-        },
-      ]);
-    });
+    socket.on(
+      "messageRecieved",
+      ({ senderUserId, firstName, text, timestamp }) => {
+        if (senderUserId === userId) return; // Ignore own messages
+
+        const formattedTimestamp = new Date(timestamp)
+          .toTimeString()
+          .split(" ")[0];
+        setMessages((prev) => [
+          ...prev,
+          { senderUserId, firstName, text, timestamp: formattedTimestamp },
+        ]);
+      }
+    );
 
     return () => {
       socket.disconnect();
     };
   }, [userId, targetUserId]);
 
+  // Fetch messages on target user change
+  useEffect(() => {
+    fetchChatMessages();
+  }, [targetUserId]);
+
   // Handle Enter key press
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
-      sendMesage();
+      sendMessage();
     }
   };
 
@@ -128,11 +128,9 @@ const Chat = () => {
           return (
             <div
               key={index}
-              // Use Tailwind classes to position the bubble based on sender
               className={`flex ${isSender ? "justify-end" : "justify-start"}`}
             >
-              <div className={`max-w-[70%] lg:max-w-[50%]`}>
-                {/* Chat Header: Name and Time */}
+              <div className="max-w-[70%] lg:max-w-[50%]">
                 <div
                   className={`flex items-baseline mb-1 ${
                     isSender ? "flex-row-reverse" : "flex-row"
@@ -150,31 +148,27 @@ const Chat = () => {
                   </time>
                 </div>
 
-                {/* Chat Bubble */}
                 <div
                   className={`px-4 py-2 rounded-xl text-white shadow-md ${
                     isSender
-                      ? "bg-pink-600 rounded-tr-none" // Your message: Pink/Purple, rounded on left
-                      : "bg-gray-700 rounded-tl-none" // Their message: Darker gray, rounded on right
+                      ? "bg-pink-600 rounded-tr-none"
+                      : "bg-gray-700 rounded-tl-none"
                   }`}
                 >
                   {message.text}
                 </div>
 
-                {/* Chat Footer: Seen */}
                 <div
                   className={`text-xs opacity-50 text-gray-500 mt-1 ${
                     isSender ? "text-right" : "text-left"
                   }`}
                 >
-                  {/* Note: Real 'Seen' logic requires more backend work, keeping it here for UI */}
                   {isSender && <span>Seen</span>}
                 </div>
               </div>
             </div>
           );
         })}
-        {/* Invisible element to scroll to */}
         <div ref={messagesEndRef} />
       </div>
 
@@ -190,7 +184,7 @@ const Chat = () => {
         />
         <button
           className="btn bg-pink-600 hover:bg-pink-700 border-none text-white font-semibold py-3 px-6 rounded-lg transition duration-150 shadow-lg"
-          onClick={sendMesage}
+          onClick={sendMessage}
           disabled={!newMessage.trim()}
         >
           Send

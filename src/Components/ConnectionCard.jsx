@@ -12,7 +12,7 @@ const ConnectionCard = ({ connection }) => {
     // Outer container: Set width, center with mx-auto, dark background, rounded corners, padding
     <div className="w-full md:w-1/2 mx-auto my-4 p-4 rounded-xl bg-gray-800 shadow-lg flex items-center space-x-6">
       {/* Profile Image Container */}
-      <div className="flex-shrink-0">
+      <div className="shrink-0">
         <img
           // The image in the example is a rounded square or circle.
           src={photoUrl || "default_avatar.png"} // Add a fallback for the photoUrl
