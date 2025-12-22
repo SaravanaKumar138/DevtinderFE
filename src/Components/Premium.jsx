@@ -51,8 +51,8 @@ const Premium = () => {
 
   }
   }
-  return (
-  !isPremiumUser ?   <div className="w-full min-h-screen flex items-center justify-center px-6">
+  return !isPremiumUser ? (
+    <div className="w-full min-h-screen flex items-center justify-center px-6">
       <div className="flex flex-col lg:flex-row items-center gap-10 w-full max-w-6xl">
         {/* Silver */}
         <div className="w-full bg-[#0f172a] border border-blue-900/40 hover:border-blue-400 rounded-2xl p-10 shadow-lg hover:shadow-blue-500/30 hover:-translate-y-1 transition-all duration-300">
@@ -61,9 +61,11 @@ const Premium = () => {
           </h2>
 
           <ul className="text-gray-300 space-y-3 text-center mb-8">
-            <li className="hover:text-blue-300 transition">✔ Blue Tick</li>
             <li className="hover:text-blue-300 transition">
-              ✔ 100 Requests / Day
+              Verified Account Badge
+            </li>
+            <li className="hover:text-blue-300 transition">
+              Priority Feature Access
             </li>
           </ul>
 
@@ -89,11 +91,11 @@ const Premium = () => {
 
           <ul className="text-gray-300 space-y-3 text-center mb-8">
             <li className="hover:text-blue-200 transition">
-              ✔ 200 Requests / Day
+              Verified Account Badge
             </li>
-            <li className="hover:text-blue-200 transition">✔ Blue Tick</li>
+           
             <li className="hover:text-blue-200 transition">
-              ✔ Priority Matching
+              Priority Feature Access
             </li>
           </ul>
 
@@ -109,7 +111,9 @@ const Premium = () => {
           </button>
         </div>
       </div>
-    </div> : "You are a Premium User Now!"
+    </div>
+  ) : (
+    "You are a Premium User Now!"
   );
 };
 
