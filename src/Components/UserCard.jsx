@@ -22,23 +22,23 @@ const UserCard = ({ user }) => {
   };
 
   return (
-    <div className="card bg-base-300 w-96 shadow-sm">
-      <figure className="w-full h-64 overflow-hidden">
+    <div className="card bg-base-300 w-[420px] shadow-sm">
+      <figure className="w-full h-[420px] overflow-hidden">
         <img
           src={photoUrl}
           alt="photo"
-          className="w-full h-full object-cover rounded-xl"
+          className="w-full h-full object-cover rounded-t-xl"
         />
       </figure>
 
       <div className="card-body">
-        <h2 className="card-title">{firstName + " " + lastName}</h2>
+        <h2 className="card-title text-xl">{firstName + " " + lastName}</h2>
 
         {age && <p>Age: {age}</p>}
         {gender && <p>Gender: {gender}</p>}
         {about && <p>About: {about}</p>}
 
-        <div className="card-actions justify-evenly">
+        <div className="card-actions justify-evenly mt-4">
           <button
             className="btn btn-primary"
             onClick={() => handleSendRequest("ignored", user._id)}
