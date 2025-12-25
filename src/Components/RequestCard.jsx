@@ -1,60 +1,42 @@
 import axios from "axios";
-import React from "react";
+import React, { useEffect } from "react";
 import { url } from "../utils/constants";
-import { useDispatch } from "react-redux";
-import { removeRequests } from "../utils/requestSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { addRequests } from "../utils/requestSlice";
+import RequestCard from "./RequestCard";
 
-const RequestCard = ({ request }) => {
-  console.log(request);
-  const { firstName, lastName, age, photoUrl, gender } = request.fromUserId;
+const Requests = () => {
   const dispatch = useDispatch();
-  const reviewRequest = async (status, _id) => {
+  const requests = useSelector((store) => store.request);
+  console.log(requests);
+  const fetchRequest = async () => {
     try {
-      const res = await axios.post(
-        url + "/request/review/" + status + "/" + _id,
-        {},
-        { withCredentials: true }
-      );
-      dispatch(removeRequests(_id));
-    } catch (err) {
-      console.log(err.message);
-    }
+      const res = await axios.get(url + "/user/requests/received", {
+        withCredentials: true,
+      });
+      dispatch(addRequests(res?.data?.data));
+    } catch (err) {}
   };
-  return (
-    <div>
-      <h1 className="font-bold text-2xl m-5 flex justify-center">
-        Connection Requests
+
+  useEffect(() => {
+    fetchRequest();
+  }, []);
+  if (!requests || requests.length == 0)
+    return (
+      <h1 className="flex justify-center text-2xl font-bold m-5">
+        No Connection Request
       </h1>
-      <div className="flex items-center w-1/2 bg-base-300 mx-auto justify-evenly rounded-xl">
-        <div>
-          <img src={photoUrl} alt="" className="h-32 w-32 rounded-full m-2" />
-        </div>
-        <div className="ml-5">
-          <h1 className="text-2xl font-semibold">
-            {firstName + " " + lastName}
-          </h1>
-          {gender && (
-            <h1 className="text-xl font-semibold">Gender: {gender}</h1>
-          )}
-          {age && <h1 className="text-xl font-semibold">Age: {age}</h1>}
-        </div>
-        <div>
-          <button
-            className="btn btn-primary mx-2 p-5 text-xl"
-            onClick={() => reviewRequest("rejected", request._id)}
-          >
-            Reject
-          </button>
-          <button
-            className="btn btn-secondary p-5 text-xl"
-            onClick={() => reviewRequest("accepted", request._id)}
-          >
-            Accept
-          </button>
-        </div>
+    );
+  return (
+    requests && (
+      <div>
+        {requests.map((request) => (
+          <RequestCard key={request._id} request={request} />
+        ))}
       </div>
-    </div>
+    )
   );
 };
 
-export default RequestCard;
+export default Requests;
+

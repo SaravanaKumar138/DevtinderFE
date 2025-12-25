@@ -1,4 +1,4 @@
 
 
 
-export const url = location.hostname === "localhost" ? "http://localhost:7777"  : "/api";
+export const url = location.hostname === "localhost" ? "http://localhost:3333"  : "/api";

@@ -5,13 +5,14 @@ import { useDispatch } from "react-redux";
 import { removeFeed } from "../utils/feedSlice";
 
 const UserCard = ({ user }) => {
-  const { firstName, lastName, photoUrl, age, gender, about } = user;
+  const { firstName, lastName, photoUrl, age, gender, about, skills } = user;
   const dispatch = useDispatch();
   console.log(user);
+
   const handleSendRequest = async (status, userId) => {
     try {
-      const res = await axios.post(
-        url + "/request/send/" + status + "/" + userId,
+      await axios.post(
+        `${url}/request/send/${status}/${userId}`,
         {},
         { withCredentials: true }
       );
@@ -22,35 +23,80 @@ const UserCard = ({ user }) => {
   };
 
   return (
-    <div className="card bg-base-300 w-[420px] shadow-sm">
-      <figure className="w-full h-[420px] overflow-hidden">
+    <div
+      className="w-[420px] rounded-2xl overflow-hidden 
+  bg-white/5 backdrop-blur-xl 
+  border border-white/10 
+  shadow-xl hover:shadow-indigo-500/30 
+  transition-all duration-300 hover:scale-[1.03]"
+    >
+      {/* IMAGE */}
+      <div className="relative w-full h-[360px] overflow-hidden">
         <img
           src={photoUrl}
-          alt="photo"
-          className="w-full h-full object-cover rounded-t-xl"
+          alt="profile"
+          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
         />
-      </figure>
 
-      <div className="card-body">
-        <h2 className="card-title text-xl">{firstName + " " + lastName}</h2>
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+      </div>
 
-        {age && <p>Age: {age}</p>}
-        {gender && <p>Gender: {gender}</p>}
-        {about && <p>About: {about}</p>}
+      {/* CONTENT */}
+      <div className="p-2 text-white">
+        <h2
+          className="text-2xl font-bold bg-clip-text text-transparent 
+      bg-gradient-to-r from-indigo-400 to-pink-400"
+        >
+          {firstName} {lastName}
+        </h2>
+        {about && (
+          <p className="mt-3 text-sm text-gray-300 leading-relaxed line-clamp-3">
+            {about}
+          </p>
+        )}
 
-        <div className="card-actions justify-evenly mt-4">
+        {/* SKILLS */}
+        {skills?.length > 0 && (
+          <div className="mt-4">
+            <p className="text-xs uppercase tracking-widest text-gray-400 mb-2">
+              Skills
+            </p>
+
+            <div className="flex flex-wrap gap-2">
+              {skills.map((skill, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1 rounded-full text-xs font-semibold
+              bg-indigo-500/20 text-indigo-300 
+              border border-indigo-400/30
+              hover:bg-indigo-500/30 transition"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ACTIONS */}
+        <div className="flex justify-between mt-6 gap-4">
           <button
-            className="btn btn-primary"
+            className="w-1/2 py-3 rounded-xl 
+        bg-red-500/20 text-red-400 
+        hover:bg-red-500/30 transition font-semibold"
             onClick={() => handleSendRequest("ignored", user._id)}
           >
-            Ignore
+            ❌ Ignore
           </button>
 
           <button
-            className="btn btn-secondary"
+            className="w-1/2 py-3 rounded-xl 
+        bg-indigo-500/20 text-indigo-400 
+        hover:bg-indigo-500/30 transition font-semibold"
             onClick={() => handleSendRequest("interested", user._id)}
           >
-            Interested
+            ❤️ Interested
           </button>
         </div>
       </div>

@@ -14,21 +14,28 @@ import Connections from "./Components/Connections";
 import Requests from "./Components/Requests";
 import Chat from "./Components/Chat";
 import Premium from "./Components/Premium";
+import Home from "./Components/Home";
+import SmartMatches from "./Components/SmartMatches";
 
 function App() {
   return (
     <>
       <Provider store={appStore}>
-        <BrowserRouter basename="/">
+        <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Body />}>
-              <Route path="/feed" element={<Feed />}></Route>
-              <Route path="/login" element={<Login />}></Route>
-              <Route path="/profile" element={<Profile />}></Route>
-              <Route path="/connections" element={<Connections />}></Route>
-              <Route path="/requests" element={<Requests />}></Route>
-              <Route path="/chat/:targetUserId" element={<Chat />}></Route>
-              <Route path="/premium" element={<Premium />}></Route>
+            {/* Public Home */}
+            <Route path="/" element={<Home />} />
+
+            {/* Authenticated Layout */}
+            <Route element={<Body />}>
+              <Route path="/feed" element={<Feed />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/connections" element={<Connections />} />
+              <Route path="/requests" element={<Requests />} />
+              <Route path="/matches" element={<SmartMatches />} />,
+              <Route path="/chat/:targetUserId" element={<Chat />} />
+              <Route path="/premium" element={<Premium />} />
             </Route>
           </Routes>
         </BrowserRouter>

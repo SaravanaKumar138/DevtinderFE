@@ -14,10 +14,8 @@ const Connections = () => {
       const res = await axios.get(url + "/user/connections", {
         withCredentials: true,
       });
-      console.log(res?.data?.data);
       dispatch(addConnections(res?.data?.data));
     } catch (err) {
-      // It's generally better to handle the error here, perhaps logging it or setting an error state
       console.error("Failed to fetch connections:", err);
     }
   };
@@ -26,25 +24,27 @@ const Connections = () => {
     fetchConnections();
   }, []);
 
-  if (!connections) return;
-  if (connections.length === 0)
+  if (!connections) return null;
+
+  if (connections.length === 0) {
     return (
-      <h1 className="flex justify-center m-10 text-xl text-gray-400">
-        No connections found
-      </h1>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]">
+        <h1 className="text-3xl text-gray-300 font-semibold">
+          🤝 No connections yet
+        </h1>
+      </div>
     );
+  }
 
   return (
-    <div className="p-4">
-      {/* Enhanced Heading: Centered, large, bold, and bright white text */}
-      <h1 className="text-4xl font-extrabold text-white text-center my-8">
-        Connections
+    <div className="min-h-screen px-6 py-16 bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white">
+      <h1 className="text-4xl md:text-5xl font-extrabold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-pink-400">
+        Your Connections
       </h1>
-      <div className="space-y-4">
-        {" "}
-        {/* Add some vertical spacing between cards */}
+
+      <div className="max-w-5xl mx-auto space-y-6">
         {connections.map((connection) => (
-          <ConnectionCard key={connection._id} connection={connection} />
+          <ConnectionCard key={connection._id} connection={connection}  />
         ))}
       </div>
     </div>
