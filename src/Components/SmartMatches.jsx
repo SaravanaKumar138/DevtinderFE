@@ -15,7 +15,7 @@ const SmartMatches = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`${url}/matches`, {
+      const res = await axios.get(`${url}/matches/match`, {
         params: {
           skills: skills.join(","), // backend expects query
           experience,

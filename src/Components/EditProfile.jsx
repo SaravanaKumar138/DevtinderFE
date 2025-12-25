@@ -38,7 +38,9 @@ const EditProfile = ({ user }) => {
 
 
   const saveChanges = async () => {
+
     try {
+      
       const res = await axios.patch(
         `${url}/profile/edit`,
         { firstName, lastName, age, experience, skills, gender, photoUrl, about },
