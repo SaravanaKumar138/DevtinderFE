@@ -7,8 +7,27 @@ const Premium = () => {
   useEffect(() => {
     verifyPremiumUser();
   },[]);
+  const loadRazorpay = () => {
+  return new Promise((resolve, reject) => {
+    // If already loaded, resolve immediately
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+
+    script.onload = () => resolve(true);
+    script.onerror = () => reject(new Error("Razorpay SDK failed to load"));
+
+    document.body.appendChild(script);
+  })};
+
   const handleClick = async (plan) => {
     try {
+       await loadRazorpay();
       const order = await axios.post(
         url + "/payment/create",
         { plan },
@@ -34,7 +53,7 @@ const Premium = () => {
       };
       const rzp = new window.Razorpay(options);
       rzp.open();
-      console.log(response);
+     
     } catch (error) {
       console.error("Error initiating payment:", error);
     }
