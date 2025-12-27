@@ -40,16 +40,14 @@ const Premium = () => {
         description: "Connect to other Developers",
         order_id: orderId, // This is the order_id created in the backend// Your success URL
         prefill: {
-          name: notes.firstName + " " + notes.lastName,
+          name: notes.firstName+ " "+notes.lastName,
           email: notes.emailId,
           contact: "9999999999",
         },
         theme: {
           color: "#F37254",
         },
-        handler: () => {
-          setTimeout(verifyPremiumUser, 5000);
-        },
+        handler: verifyPremiumUser,
       };
       const rzp = new window.Razorpay(options);
       rzp.open();
