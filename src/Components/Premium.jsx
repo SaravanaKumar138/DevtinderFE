@@ -1,12 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { url } from "../utils/constants";
 import axios from "axios";
 
 const Premium = () => {
-  const [isPremiumUser, setIsPremiumUser] = React.useState(false);
-  useEffect(() => {
-    verifyPremiumUser();
-  },[]);
+  const [isPremiumUser, setIsPremiumUser] = useState(false);
+
   const loadRazorpay = () => {
   return new Promise((resolve, reject) => {
     // If already loaded, resolve immediately
@@ -42,14 +40,16 @@ const Premium = () => {
         description: "Connect to other Developers",
         order_id: orderId, // This is the order_id created in the backend// Your success URL
         prefill: {
-          name: notes.firstName+ " "+notes.lastName,
+          name: notes.firstName + " " + notes.lastName,
           email: notes.emailId,
           contact: "9999999999",
         },
         theme: {
           color: "#F37254",
         },
-        handler: verifyPremiumUser,
+        handler: () => {
+          setTimeout(verifyPremiumUser, 5000);
+        },
       };
       const rzp = new window.Razorpay(options);
       rzp.open();
@@ -70,6 +70,9 @@ const Premium = () => {
 
   }
   }
+    useEffect(() => {
+      verifyPremiumUser();
+    }, []);
   return !isPremiumUser ? (
     <div className="w-full min-h-screen flex items-center justify-center px-6">
       <div className="flex flex-col lg:flex-row items-center gap-10 w-full max-w-6xl">
