@@ -47,11 +47,15 @@ const SmartMatches = () => {
   // ✅ Skills present → show page
   return (
     <div>
-      <h1 className="text-xl font-bold text-white">Smart Matches</h1>
+      <h1 className="text-4xl md:text-5xl font-extrabold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-pink-400">
+        Smart Matches
+      </h1>
       {/* Matches list will go here */}
-      {
-        matches.map((user) => <ConnectionCard connection={user} showMatching={false}/>)
-      }
+      <div className="max-w-5xl mx-auto space-y-6">
+        {matches.map((user) => (
+          <ConnectionCard connection={user} showMatching={false} />
+        ))}
+      </div>
     </div>
   );
 };
