@@ -26,6 +26,7 @@ const ConnectionCard = ({ connection , showMatching = true}) => {
           {age && <span>🎂 {age}</span>}
           {gender && <span>⚧ {gender}</span>}
         </div>
+     
         <div>
           {skills &&
             skills.map((s) => (

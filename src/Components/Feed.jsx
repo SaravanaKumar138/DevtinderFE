@@ -47,16 +47,16 @@ const Feed = () => {
 
   /* ✅ FEED UI */
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white px-4">
+    <div className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white px-4">
       {/* Section title */}
-      <h1 className="text-3xl md:text-4xl font-bold mb-10 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-pink-400 to-purple-400">
+      <h1 className="text-3xl md:text-4xl font-bold  mb-2 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-pink-400 to-purple-400">
         Discover Developers
       </h1>
+
       {/* Card wrapper */}
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] px-4">
+      <div className="flex items-start justify-center w-full">
         <UserCard user={feedData[0]} />
       </div>
-      
     </div>
   );
 };

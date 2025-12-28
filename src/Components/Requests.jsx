@@ -29,7 +29,8 @@ const Requests = () => {
     );
   return (
     requests && (
-      <div>
+      <div className="max-w-5xl mx-auto space-y-6">
+        <h1 className="text-2xl font-bold text-center">Connection Requests</h1>
         {requests.map((request) => (
           <RequestCard key={request._id} request={request} />
         ))}

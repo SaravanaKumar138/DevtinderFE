@@ -12,7 +12,7 @@ const EditProfile = ({ user }) => {
   const [experience, setExperience] = useState(user.experience || 0);
  const [skills, setSkills] = useState(user.skills || []);
  const [skillInput, setSkillInput] = useState("");
-
+ const [role, setRole] = useState(user.role || "");
   const [age, setAge] = useState(user.age || "");
   const [gender, setGender] = useState(user.gender || "");
   const [about, setAbout] = useState(user.about || "");
@@ -43,7 +43,7 @@ const EditProfile = ({ user }) => {
       
       const res = await axios.patch(
         `${url}/profile/edit`,
-        { firstName, lastName, age, experience, skills, gender, photoUrl, about },
+        { firstName, lastName, age, experience,role, skills, gender, photoUrl, about },
         { withCredentials: true }
       );
       dispatch(addUser(res.data.data));
@@ -79,9 +79,9 @@ const EditProfile = ({ user }) => {
             ["Last Name", lastName, setLastName],
             ["Photo URL", photoUrl, setPhotoUrl],
             ["Experience", experience, setExperience],
+            ["Role", role, setRole],
             ["skills", skills, setSkills],
             ["Age", age, setAge],
-            ["Gender", gender, setGender],
             ["About", about, setAbout],
           ].map(([label, value, setter]) =>
             label === "skills" ? (
@@ -127,6 +127,23 @@ const EditProfile = ({ user }) => {
                   onChange={(e) => setter(e.target.value)}
                   className="mt-1 w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 focus:border-indigo-400 outline-none"
                 />
+                {label === "Age" && (
+                  <div className="mb-4">
+                    <label className="text-sm text-gray-300">Gender</label>
+                    <select
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="mt-1 w-full px-4 py-2 rounded-lg 
+               bg-black/40 border border-white/10 
+               focus:border-indigo-400 outline-none text-white"
+                    >
+                      <option value="">Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                )}
               </div>
             )
           )}

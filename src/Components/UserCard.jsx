@@ -3,12 +3,13 @@ import React from "react";
 import { url } from "../utils/constants";
 import { useDispatch } from "react-redux";
 import { removeFeed } from "../utils/feedSlice";
+import GreenTick from "./GreenTick";
+import RedCross from "./RedCross";
 
 const UserCard = ({ user }) => {
-  const { firstName, lastName, photoUrl, age, gender, about, skills } = user;
+  const { firstName, lastName, photoUrl, age, gender, about, skills , role, experience} = user;
   const dispatch = useDispatch();
   console.log(user);
-
   const handleSendRequest = async (status, userId) => {
     try {
       await axios.post(
@@ -31,7 +32,7 @@ const UserCard = ({ user }) => {
   transition-all duration-300 hover:scale-[1.03]"
     >
       {/* IMAGE */}
-      <div className="relative w-full h-[360px] overflow-hidden">
+      <div className="relative w-full h-[340px] overflow-hidden">
         <img
           src={photoUrl}
           alt="profile"
@@ -50,6 +51,19 @@ const UserCard = ({ user }) => {
         >
           {firstName} {lastName}
         </h2>
+        {role && (
+          <div className="mt-2">
+            <span
+              className="px-3 py-1 rounded-full text-xs font-semibold
+  bg-indigo-500/20 text-indigo-300
+  border border-indigo-400/30
+  hover:bg-indigo-500/30 transition "
+            >
+              {role} • {experience} yrs
+            </span>
+          </div>
+        )}
+
         {about && (
           <p className="mt-3 text-sm text-gray-300 leading-relaxed line-clamp-3">
             {about}
@@ -81,23 +95,25 @@ const UserCard = ({ user }) => {
 
         {/* ACTIONS */}
         <div className="flex justify-between mt-6 gap-4">
-          <button
+           <button
             className="w-1/2 py-3 rounded-xl 
         bg-red-500/20 text-red-400 
         hover:bg-red-500/30 transition font-semibold"
             onClick={() => handleSendRequest("ignored", user._id)}
           >
             ❌ Ignore
-          </button>
+          </button> 
+        
 
-          <button
+           <button
             className="w-1/2 py-3 rounded-xl 
         bg-indigo-500/20 text-indigo-400 
         hover:bg-indigo-500/30 transition font-semibold"
             onClick={() => handleSendRequest("interested", user._id)}
           >
             ❤️ Interested
-          </button>
+          </button> 
+         
         </div>
       </div>
     </div>
