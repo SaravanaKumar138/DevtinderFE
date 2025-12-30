@@ -9,7 +9,6 @@ import RedCross from "./RedCross";
 const UserCard = ({ user }) => {
   const { firstName, lastName, photoUrl, age, gender, about, skills , role, experience} = user;
   const dispatch = useDispatch();
-  console.log(user);
   const handleSendRequest = async (status, userId) => {
     try {
       await axios.post(

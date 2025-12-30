@@ -10,16 +10,15 @@ const EditProfile = ({ user }) => {
   const [lastName, setLastName] = useState(user.lastName);
   const [photoUrl, setPhotoUrl] = useState(user.photoUrl || "");
   const [experience, setExperience] = useState(user.experience || 0);
- const [skills, setSkills] = useState(user.skills || []);
- const [skillInput, setSkillInput] = useState("");
- const [role, setRole] = useState(user.role || "");
+  const [skills, setSkills] = useState(user.skills || []);
+  const [skillInput, setSkillInput] = useState("");
+  const [role, setRole] = useState(user.role || "");
   const [age, setAge] = useState(user.age || "");
   const [gender, setGender] = useState(user.gender || "");
   const [about, setAbout] = useState(user.about || "");
   const [error, setError] = useState("");
   const [toaster, setToaster] = useState(false);
   const dispatch = useDispatch();
-
 
   const addSkill = () => {
     if (!skillInput.trim()) return;
@@ -36,16 +35,24 @@ const EditProfile = ({ user }) => {
     setSkills(skills.filter((s) => s !== skill));
   };
 
-
   const saveChanges = async () => {
-
     try {
-      
       const res = await axios.patch(
         `${url}/profile/edit`,
-        { firstName, lastName, age : Number(age),experience: Number(experience),role, skills, gender, photoUrl, about },
+        {
+          firstName,
+          lastName,
+          age: Number(age),
+          experience: Number(experience),
+          role,
+          skills: Array.isArray(skills) ? skills : [],
+          gender,
+          photoUrl,
+          about,
+        },
         { withCredentials: true }
       );
+      console.log(res);
       dispatch(addUser(res.data.data));
       setToaster(true);
       setTimeout(() => setToaster(false), 3000);
@@ -53,7 +60,7 @@ const EditProfile = ({ user }) => {
       setError(err?.response?.data?.message || "Something went wrong");
     }
   };
-  
+
   return (
     <div className="min-h-screen px-6 py-16 bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white">
       {/* TOASTER */}
