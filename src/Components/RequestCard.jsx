@@ -20,7 +20,7 @@ const RequestCard = ({request}) => {
    const handleRequest = async (status, userId) => {
    try {
      const response = await axios.post(
-       `${url}/review/${status}/${userId}`,
+       `${url}/request/review/${status}/${userId}`,
        {},
        { withCredentials: true }
      );
