@@ -70,7 +70,7 @@ const RequestCard = ({request}) => {
           className="w-1/2 py-3 px-2 rounded-xl 
         bg-red-500/20 text-red-400 
         hover:bg-red-600/30 transition font-semibold"
-          onClick={() => handleRequest("rejected", request.fromUserId._id)}
+          onClick={() => handleRequest("rejected", request._id)}
         >
           ❌ Reject
         </button>
@@ -78,7 +78,7 @@ const RequestCard = ({request}) => {
           className="w-1/2 py-3 px-2 rounded-xl 
         bg-indigo-500/20 text-indigo-400 
         hover:bg-indigo-600/30 transition font-semibold"
-          onClick={() => handleRequest("accepted", request.fromUserId._id)}
+          onClick={() => handleRequest("accepted", request._id)}
         >
           ❤️ Accept
         </button>

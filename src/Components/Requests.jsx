@@ -23,14 +23,16 @@ const Requests = () => {
   }, []);
   if (!requests || requests.length == 0)
     return (
-      <h1 className="flex justify-center text-2xl font-bold m-5">
+      <h1 className="text-3xl md:text-4xl font-extrabold text-center mb-12 mt-10 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-pink-400">
         No Connection Request
       </h1>
     );
   return (
     requests && (
-      <div className="max-w-5xl mx-auto space-y-6">
-        <h1 className="text-2xl font-bold text-center">Connection Requests</h1>
+      <div className="min-h-screen px-6 py-16 bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-pink-400">
+           Connection Request
+        </h1>
         {requests.map((request) => (
           <RequestCard key={request._id} request={request} />
         ))}

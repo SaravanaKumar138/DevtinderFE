@@ -43,7 +43,7 @@ const EditProfile = ({ user }) => {
       
       const res = await axios.patch(
         `${url}/profile/edit`,
-        { firstName, lastName, age, experience,role, skills, gender, photoUrl, about },
+        { firstName, lastName, age : Number(age),experience: Number(experience),role, skills, gender, photoUrl, about },
         { withCredentials: true }
       );
       dispatch(addUser(res.data.data));
@@ -53,7 +53,7 @@ const EditProfile = ({ user }) => {
       setError(err?.response?.data?.message || "Something went wrong");
     }
   };
-
+  
   return (
     <div className="min-h-screen px-6 py-16 bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white">
       {/* TOASTER */}
