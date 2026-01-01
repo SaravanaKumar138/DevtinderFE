@@ -77,7 +77,7 @@ const UserCard = ({ user }) => {
             </p>
 
             <div className="flex flex-wrap gap-2">
-              {skills.map((skill, index) => (
+              {skills.slice(0, 3).map((skill, index) => (
                 <span
                   key={index}
                   className="px-3 py-1 rounded-full text-xs font-semibold
@@ -87,7 +87,9 @@ const UserCard = ({ user }) => {
                 >
                   {skill}
                 </span>
-              ))}
+               
+              ))
+              }
             </div>
           </div>
         )}
