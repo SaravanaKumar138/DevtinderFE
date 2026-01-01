@@ -138,12 +138,11 @@
 // };
 
 // export default Premium;
-import React from 'react'
-import { url } from '../utils/constants';
-import axios from 'axios';
+import React from "react";
+import axios from "axios";
+import { url } from "../utils/constants";
 
 const Premium = () => {
-
   const handlePayment = async (plan) => {
     try {
       const res = await axios.post(
@@ -151,57 +150,98 @@ const Premium = () => {
         { plan },
         { withCredentials: true }
       );
-      console.log(res.data);
+
       const { amount, currency, notes, keyId, orderId } = res.data;
-            const options = {
-              key: keyId, // Replace with your Razorpay key_id
-              amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-              currency,
-              name: "DevTinder",
-              description: "Connect to other Developers",
-              order_id: orderId, // This is the order_id created in the backend// Your success URL
-              prefill: {
-                name: notes.firstName+ " "+notes.lastName,
-                email: notes.emailId,
-                contact: "9999999999",
-              },
-              theme: {
-                color: "#F37254",
-              },
-            };
-            const rzp = new window.Razorpay(options);
-            rzp.open();
+
+      const options = {
+        key: keyId,
+        amount,
+        currency,
+        name: "DevTinder",
+        description: "Connect to other Developers",
+        order_id: orderId,
+        prefill: {
+          name: `${notes.firstName} ${notes.lastName}`,
+          email: notes.emailId,
+          contact: "9999999999",
+        },
+        theme: {
+          color: "#6366F1",
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error("Payment error", err);
     }
-    catch(err) {
-      console.error("Error initiating payment:", err);
-    }
-  }
+  };
+
   return (
-    <div>
-      <h1 className=''>Premium Component</h1>
-      <div className="flex w-4/5 flex-col lg:flex-row mx-auto my-40">
-        <div className="card bg-base-300 rounded-box grid h-48 grow place-items-center">
-          Silver MemberShip
-          <ul>
-            <li>Verified Account Badge</li>
-            <li>Priority Feature Access</li>
-            <li>3 months</li>
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white flex flex-col items-center justify-center px-6">
+      {/* Title */}
+      <h1 className="text-3xl font-bold text-white mb-12">
+        Premium Membership
+      </h1>
+
+      {/* Cards */}
+      <div className="flex flex-col lg:flex-row gap-10 w-full max-w-5xl">
+        {/* Silver */}
+        <div className="flex-1 bg-slate-900 border border-slate-700 rounded-2xl p-10 shadow-xl hover:shadow-indigo-500/30 transition">
+          <h2 className="text-2xl font-semibold text-indigo-300 text-center mb-6">
+            Silver Membership
+          </h2>
+
+          <ul className="text-gray-300 space-y-3 text-center mb-8">
+            <li>✔ Verified Account Badge</li>
+            <li>✔ Priority Feature Access</li>
+            <li>✔ 3 Months Validity</li>
           </ul>
-          <button onClick={() => handlePayment("silver")} className='btn btn-secondary'>Buy Silver</button>
+
+          <div className="text-center text-4xl font-bold text-indigo-400 mb-6">
+            ₹99
+          </div>
+
+          <button
+            onClick={() => handlePayment("silver")}
+            className="w-full py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-semibold transition"
+          >
+            Buy Silver
+          </button>
         </div>
-        <div className="divider lg:divider-horizontal">OR</div>
-        <div className="card bg-base-300 rounded-box grid h-48 grow place-items-center">
-          Gold MemeberShip
-          <ul>
-            <li>Verified Account Badge</li>
-            <li>Priority Feature Access</li>
-            <li>6 months</li>
+
+        {/* OR */}
+        <div className="hidden lg:flex items-center text-gray-400 font-semibold">
+          OR
+        </div>
+
+        {/* Gold */}
+        <div className="flex-1 bg-slate-900 border border-yellow-700/40 rounded-2xl p-10 shadow-xl hover:shadow-yellow-500/30 transition">
+          <h2 className="text-2xl font-semibold text-yellow-300 text-center mb-6">
+            Gold Membership
+          </h2>
+
+          <ul className="text-gray-300 space-y-3 text-center mb-8">
+            <li>✔ Verified Account Badge</li>
+            <li>✔ Priority Feature Access</li>
+            <li>✔ 6 Months Validity</li>
           </ul>
-          <button onClick={() => handlePayment("gold")} className='btn btn-primary'>Buy Gold</button>
+
+          <div className="text-center text-4xl font-bold text-yellow-400 mb-6">
+            ₹199
+          </div>
+
+          <button
+            onClick={() => handlePayment("gold")}
+            className="w-full py-3 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-semibold transition"
+          >
+            Buy Gold
+          </button>
         </div>
       </div>
     </div>
   );
-}
+};
 
-export default Premium
+export default Premium;
+
