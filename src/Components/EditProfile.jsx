@@ -28,9 +28,9 @@ console.log(user);
   const [about, setAbout] = useState(user.about || "");
 
   // 🔹 CORE SKILLS
-  const [primarySkill, setPrimarySkill] = useState(user.skills?.[0].toLowerCase() || "");
-  const [secondarySkill, setSecondarySkill] = useState(user.skills?.[1].toLowerCase() || "");
-  const [tertiarySkill, setTertiarySkill] = useState(user.skills?.[2].toLowerCase() || "");
+  const [primarySkill, setPrimarySkill] = useState(user.skills?.[0] || "");
+  const [secondarySkill, setSecondarySkill] = useState(user.skills?.[1] || "");
+  const [tertiarySkill, setTertiarySkill] = useState(user.skills?.[2] || "");
 
   // 🔹 EXTRA SKILLS
   const [extraSkills, setExtraSkills] = useState(user.skills?.slice(3) || []);
