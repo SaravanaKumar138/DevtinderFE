@@ -23,7 +23,7 @@ const Requests = () => {
   }, []);
   if (!requests || requests.length == 0)
     return (
-      <h1 className="text-3xl md:text-4xl font-extrabold text-center mb-12 mt-10 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-pink-400">
+      <h1 className="text-3xl md:text-4xl  font-extrabold text-center mb-12 mt-10 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-pink-400">
         No Connection Request
       </h1>
     );

@@ -138,11 +138,12 @@
 // };
 
 // export default Premium;
-import React from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { url } from "../utils/constants";
 
 const Premium = () => {
+  const [isPremiumUser, setIsPremiumUser] = useState(false);
   const handlePayment = async (plan) => {
     try {
       const res = await axios.post(
@@ -168,6 +169,7 @@ const Premium = () => {
         theme: {
           color: "#6366F1",
         },
+        handler: verifyPremiumUser,
       };
 
       const rzp = new window.Razorpay(options);
@@ -176,11 +178,34 @@ const Premium = () => {
       console.error("Payment error", err);
     }
   };
+  useEffect(() => {
+  verifyPremiumUser();
+  }, []);
+
+  const verifyPremiumUser = async () => {
+    try {
+      const res = await axios.get(url+"/payment/premium/verify", {withCredentials: true});
+      console.log(res.data);
+      const {isPremium} = res.data;
+      if (isPremium) {
+        setIsPremiumUser(true);
+      }
+    }
+    catch(err) {
+      console.error("Verification error", err);
+    }
+  }
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white flex flex-col items-center justify-center px-6">
       {/* Title */}
-      <h1 className="text-3xl font-bold text-white mb-12">
+      {
+        isPremiumUser ? (
+          <h1 className="text-4xl font-extrabold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">
+            You are a Premium Member! 🚀
+          </h1>
+        ) : 
+        <div><h1 className="text-3xl font-bold text-white mb-12">
         Premium Membership
       </h1>
 
@@ -238,7 +263,9 @@ const Premium = () => {
             Buy Gold
           </button>
         </div>
-      </div>
+      </div></div>
+      }
+      
     </div>
   );
 };
