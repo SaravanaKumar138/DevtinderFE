@@ -26,6 +26,7 @@ console.log(user);
   const [age, setAge] = useState(user.age || "");
   const [gender, setGender] = useState(user.gender || "");
   const [about, setAbout] = useState(user.about || "");
+  const [image, setImage] = useState(null);
 
   // 🔹 CORE SKILLS
   const [primarySkill, setPrimarySkill] = useState(user.skills?.[0] || "");
@@ -49,37 +50,58 @@ console.log(user);
   const removeExtraSkill = (skill) => {
     setExtraSkills(extraSkills.filter((s) => s !== skill));
   };
+const saveChanges = async () => {
+  try {
+    let uploadedPhotoUrl = photoUrl;
 
-  const saveChanges = async () => {
-    try {
-      const res = await axios.patch(
-        `${url}/profile/edit`,
+    // 1️⃣ Upload image ONLY if user selected one
+    if (image) {
+      const formData = new FormData();
+      formData.append("image", image);
+
+      const uploadRes = await axios.post(
+        `${url}/profile/profile-image`,
+        formData,
         {
-          firstName,
-          lastName,
-          age: Number(age),
-          experience: Number(experience),
-          role,
-          gender,
-          photoUrl,
-          about,
-          skills: [
-            primarySkill,
-            secondarySkill,
-            tertiarySkill,
-            ...extraSkills,
-          ].filter(Boolean),
-        },
-        { withCredentials: true }
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
+        }
       );
 
-      dispatch(addUser(res.data.data));
-      setToaster(true);
-      setTimeout(() => setToaster(false), 3000);
-    } catch (err) {
-      setError(err?.response?.data?.message || "Something went wrong");
+      uploadedPhotoUrl = uploadRes.data.imageUrl;
+      setPhotoUrl(uploadedPhotoUrl); // for live preview
     }
-  };
+
+    // 2️⃣ Update profile with image URL
+   const res = await axios.patch(
+     `${url}/profile/edit`,
+     {
+       firstName,
+       lastName,
+       age: Number(age),
+       experience: Number(experience),
+       role,
+       gender,
+       about,
+       skills: [
+         primarySkill,
+         secondarySkill,
+         tertiarySkill,
+         ...extraSkills,
+       ].filter(Boolean),
+     },
+     { withCredentials: true }
+   );
+    // 3️⃣ Update redux
+    dispatch(addUser(res.data.data));
+
+    setToaster(true);
+    setTimeout(() => setToaster(false), 3000);
+  } catch (err) {
+    setError(err?.response?.data?.message || "Something went wrong");
+  }
+};
+
 
   return (
     <div className="min-h-screen px-6 py-16 bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white">
@@ -103,7 +125,6 @@ console.log(user);
           {[
             ["First Name", firstName, setFirstName],
             ["Last Name", lastName, setLastName],
-            ["Photo URL", photoUrl, setPhotoUrl],
             ["Experience", experience, setExperience],
             ["Role", role, setRole],
             ["Age", age, setAge],
@@ -117,6 +138,15 @@ console.log(user);
               />
             </div>
           ))}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files[0];
+              setImage(file);
+              setPhotoUrl(URL.createObjectURL(file)); // instant preview
+            }}
+          />
 
           {/* GENDER */}
           <div className="mb-4">
