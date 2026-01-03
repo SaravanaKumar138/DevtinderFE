@@ -54,7 +54,7 @@ const saveChanges = async () => {
   try {
     let uploadedPhotoUrl = photoUrl;
 
-    // 1️⃣ Upload image ONLY if user selected one
+    // 1️⃣ Upload image only if selected
     if (image) {
       const formData = new FormData();
       formData.append("image", image);
@@ -63,42 +63,50 @@ const saveChanges = async () => {
         `${url}/profile/profile-image`,
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
           withCredentials: true,
         }
       );
 
+      // ✅ Safety check
+      if (!uploadRes.data?.imageUrl) {
+        throw new Error("Image upload failed");
+      }
+
       uploadedPhotoUrl = uploadRes.data.imageUrl;
-      setPhotoUrl(uploadedPhotoUrl); // for live preview
+      setPhotoUrl(uploadedPhotoUrl); // replace blob with CDN URL
+      setImage(null);
     }
 
-    // 2️⃣ Update profile with image URL
-   const res = await axios.patch(
-     `${url}/profile/edit`,
-     {
-       firstName,
-       lastName,
-       age: Number(age),
-       experience: Number(experience),
-       role,
-       gender,
-       about,
-       skills: [
-         primarySkill,
-         secondarySkill,
-         tertiarySkill,
-         ...extraSkills,
-       ].filter(Boolean),
-     },
-     { withCredentials: true }
-   );
-    // 3️⃣ Update redux
+    // 2️⃣ Update profile (NO photoUrl here)
+    const res = await axios.patch(
+      `${url}/profile/edit`,
+      {
+        firstName,
+        lastName,
+        age: Number(age),
+        experience: Number(experience),
+        role,
+        gender,
+        about,
+        skills: [
+          primarySkill,
+          secondarySkill,
+          tertiarySkill,
+          ...extraSkills,
+        ].filter(Boolean),
+      },
+      { withCredentials: true }
+    );
+
     dispatch(addUser(res.data.data));
 
     setToaster(true);
     setTimeout(() => setToaster(false), 3000);
   } catch (err) {
-    setError(err?.response?.data?.message || "Something went wrong");
+    console.error(err);
+    setError(
+      err?.response?.data?.message || err?.message || "Something went wrong"
+    );
   }
 };
 
@@ -143,11 +151,16 @@ const saveChanges = async () => {
             accept="image/*"
             onChange={(e) => {
               const file = e.target.files[0];
+              if (!file) return;
+
+              const previewUrl = URL.createObjectURL(file);
               setImage(file);
-              setPhotoUrl(URL.createObjectURL(file)); // instant preview
+              setPhotoUrl(previewUrl);
+
+              // cleanup previous blob
+              return () => URL.revokeObjectURL(previewUrl);
             }}
           />
-
           {/* GENDER */}
           <div className="mb-4">
             <label className="text-sm text-gray-300">Gender</label>
