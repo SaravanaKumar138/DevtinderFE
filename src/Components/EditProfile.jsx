@@ -146,9 +146,12 @@ const saveChanges = async () => {
               />
             </div>
           ))}
+          <label className="text-sm text-gray-300 m-2">Profile Image</label>
+          <br />
           <input
             type="file"
             accept="image/*"
+            className="mb-4 w-48 text-sm text-white text-center bg-purple-600 px-2 py-2 rounded-md cursor-pointer "
             onChange={(e) => {
               const file = e.target.files[0];
               if (!file) return;
