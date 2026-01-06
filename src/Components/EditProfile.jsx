@@ -135,7 +135,7 @@ useEffect(() => {
       {/* TOASTER */}
       <div
         className={`fixed top-6 left-1/2 -translate-x-1/2 transition-all duration-500
-        ${toaster ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}
+        ${toaster ? "opacity-100 translate-y-0 z-10" : "opacity-0 -translate-y-4"}`}
       >
         <div className="px-6 py-3 bg-green-500/20 text-green-400 rounded-xl border border-green-500/30 shadow-lg">
           ✅ Profile updated successfully
