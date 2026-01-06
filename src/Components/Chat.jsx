@@ -195,99 +195,205 @@
 // };
 
 // export default Chat;
-const socketIO = require("socket.io");
-const Chat = require("../models/chat");
-const { redisClient } = require("../config/redis");
+import React, { useEffect, useRef, useState } from "react";
+import { useParams, useLocation } from "react-router-dom";
+import createSocketConnection from "../utils/socket";
+import { useSelector } from "react-redux";
+import axios from "axios";
+import { url } from "../utils/constants";
 
-const ONLINE_TTL = 60; // seconds
-const LAST_SEEN_TTL = 86400; // 24 hours
+const Chat = () => {
+  const { targetUserId } = useParams();
+  const location = useLocation();
+  const targetUserFirstName = location.state?.connection?.firstName || "User";
 
-const initializeSocket = (server) => {
-  const io = socketIO(server, {
-    cors: { origin: "http://localhost:5173" },
-  });
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [isTargetOnline, setIsTargetOnline] = useState(false);
+  const [lastSeen, setLastSeen] = useState(null);
 
-  io.on("connection", async (socket) => {
-    const userId = socket.handshake.auth?.userId;
-    if (!userId) return socket.disconnect();
+  const user = useSelector((store) => store.user);
+  const userId = user?._id;
+  const firstName = user?.firstName;
 
-    /* ---------------- USER ONLINE ---------------- */
-    await redisClient.setEx(`online:user:${userId}`, ONLINE_TTL, Date.now());
+  const socketRef = useRef(null);
+  const messagesEndRef = useRef(null);
 
-    io.emit("userPresence", {
-      userId,
-      online: true,
+  /* ---------------- FETCH CHAT HISTORY ---------------- */
+  const fetchChatMessages = async () => {
+    const res = await axios.get(`${url}/chat/${targetUserId}`, {
+      withCredentials: true,
     });
 
-    /* ---------------- HEARTBEAT ---------------- */
-    socket.on("heartbeat", async () => {
-      await redisClient.expire(`online:user:${userId}`, ONLINE_TTL);
+    const msgs = res.data.messages.map((msg) => ({
+      senderUserId: msg.senderId._id,
+      firstName: msg.senderId.firstName,
+      text: msg.text,
+      timestamp: new Date(msg.createdAt).toTimeString().split(" ")[0],
+    }));
+
+    setMessages(msgs);
+  };
+
+  /* ---------------- FORMAT LAST SEEN ---------------- */
+  const formatLastSeen = (ts) => {
+    const diff = Date.now() - ts;
+    const sec = Math.floor(diff / 1000);
+    if (sec < 60) return "just now";
+    if (sec < 3600) return `${Math.floor(sec / 60)} min ago`;
+    if (sec < 86400) return `${Math.floor(sec / 3600)} hr ago`;
+    return `${Math.floor(sec / 86400)} days ago`;
+  };
+
+  /* ---------------- SOCKET ---------------- */
+  useEffect(() => {
+    if (!userId) return;
+
+    const socket = createSocketConnection();
+    socketRef.current = socket;
+
+    socket.emit("joinChat", { targetUserId });
+
+    /* Messages */
+    socket.on("messageRecieved", (msg) => {
+      if (msg.senderUserId === userId) return;
+      setMessages((prev) => [
+        ...prev,
+        {
+          senderUserId: msg.senderUserId,
+          firstName: msg.firstName,
+          text: msg.text,
+          timestamp: new Date(msg.timestamp).toTimeString().split(" ")[0],
+        },
+      ]);
     });
 
-    /* ---------------- CHECK USER PRESENCE ---------------- */
-    socket.on("checkUserOnline", async ({ targetUserId }) => {
-      const isOnline = await redisClient.exists(`online:user:${targetUserId}`);
+    /* Presence */
+    const handlePresence = ({ userId, online, lastSeen }) => {
+      if (userId !== targetUserId) return;
 
-      let lastSeen = null;
-      if (!isOnline) {
-        lastSeen = await redisClient.get(`lastseen:user:${targetUserId}`);
-      }
+      setIsTargetOnline(online);
+      if (online) setLastSeen(null);
+      else if (lastSeen) setLastSeen(Number(lastSeen));
+    };
 
-      socket.emit("userPresence", {
-        userId: targetUserId,
-        online: Boolean(isOnline),
-        lastSeen,
-      });
-    });
+    socket.on("userPresence", handlePresence);
 
-    /* ---------------- JOIN CHAT ---------------- */
-    socket.on("joinChat", ({ targetUserId }) => {
-      const room = [userId, targetUserId].sort().join("_");
-      socket.join(room);
-    });
+    /* Heartbeat */
+    const heartbeat = setInterval(() => socket.emit("heartbeat"), 30000);
 
-    /* ---------------- SEND MESSAGE ---------------- */
-    socket.on("sendMessage", async ({ targetUserId, text, firstName }) => {
-      const roomId = [userId, targetUserId].sort().join("_");
+    /* Presence polling (safety net) */
+    const presenceCheck = setInterval(
+      () => socket.emit("checkUserOnline", { targetUserId }),
+      20000
+    );
 
-      let chat = await Chat.findOne({
-        participants: { $all: [userId, targetUserId] },
-      });
+    socket.emit("checkUserOnline", { targetUserId });
 
-      if (!chat) {
-        chat = new Chat({
-          participants: [userId, targetUserId],
-          messages: [],
-        });
-      }
+    return () => {
+      clearInterval(heartbeat);
+      clearInterval(presenceCheck);
+      socket.off("userPresence", handlePresence);
+      socket.disconnect();
+    };
+  }, [userId, targetUserId]);
 
-      chat.messages.push({ senderId: userId, text });
-      await chat.save();
+  /* ---------------- SEND MESSAGE ---------------- */
+  const sendMessage = () => {
+    if (!newMessage.trim()) return;
 
-      socket.to(roomId).emit("messageRecieved", {
+    const now = new Date();
+    setMessages((prev) => [
+      ...prev,
+      {
         senderUserId: userId,
         firstName,
-        text,
-        timestamp: new Date().toISOString(),
-      });
+        text: newMessage,
+        timestamp: now.toTimeString().split(" ")[0],
+      },
+    ]);
+
+    socketRef.current.emit("sendMessage", {
+      targetUserId,
+      text: newMessage,
+      firstName,
     });
 
-    /* ---------------- DISCONNECT ---------------- */
-    socket.on("disconnect", async () => {
-      await redisClient.del(`online:user:${userId}`);
-      await redisClient.setEx(
-        `lastseen:user:${userId}`,
-        LAST_SEEN_TTL,
-        Date.now()
-      );
+    setNewMessage("");
+  };
 
-      io.emit("userPresence", {
-        userId,
-        online: false,
-        lastSeen: Date.now(),
-      });
-    });
-  });
+  /* ---------------- SCROLL ---------------- */
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    fetchChatMessages();
+  }, [targetUserId]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] px-4">
+      <div className="w-full max-w-3xl h-[85vh] flex flex-col bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10">
+        {/* HEADER */}
+        <div className="p-5 border-b border-white/10 bg-black/30">
+          <h1 className="text-xl font-bold text-indigo-400">
+            💬 Chat with {targetUserFirstName}
+          </h1>
+          <div className="text-sm text-gray-300 flex items-center gap-2">
+            <span
+              className={`h-2.5 w-2.5 rounded-full ${
+                isTargetOnline ? "bg-green-400" : "bg-gray-400"
+              }`}
+            />
+            {isTargetOnline
+              ? "Online"
+              : lastSeen
+              ? `Last seen ${formatLastSeen(lastSeen)}`
+              : "Offline"}
+          </div>
+        </div>
+
+        {/* MESSAGES */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {messages.map((m, i) => (
+            <div
+              key={i}
+              className={`flex ${
+                m.senderUserId === userId ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div className="max-w-[70%]">
+                <div className="text-xs text-gray-400 mb-1">
+                  {m.firstName} • {m.timestamp}
+                </div>
+                <div className="px-4 py-3 rounded-xl bg-white/10 text-white">
+                  {m.text}
+                </div>
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* INPUT */}
+        <div className="p-4 border-t border-white/10 flex gap-3 bg-black/30">
+          <input
+            className="flex-1 px-4 py-3 rounded-xl bg-white/10 text-white"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            placeholder="Type a message..."
+          />
+          <button
+            onClick={sendMessage}
+            className="px-6 py-3 rounded-xl bg-indigo-500 text-white"
+          >
+            Send 🚀
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
-module.exports = initializeSocket;
+export default Chat;
