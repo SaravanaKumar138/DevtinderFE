@@ -278,7 +278,12 @@ const saveChanges = async () => {
           </h3>
           <UserCard
             isPreview
-            user={{ firstName, lastName, photoUrl, age, gender, about }}
+            user={{ firstName, lastName, photoUrl, age, gender, about , role, experience, skills: [
+              primarySkill,
+              secondarySkill,
+              tertiarySkill,
+              ...extraSkills,
+            ].filter(Boolean)}}
           />
         </div>
       </div>
