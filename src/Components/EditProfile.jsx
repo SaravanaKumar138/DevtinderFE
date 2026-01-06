@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserCard from "./UserCard";
 import { url } from "../utils/constants";
 import { useDispatch } from "react-redux";
