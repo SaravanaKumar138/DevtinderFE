@@ -249,7 +249,7 @@ const Chat = () => {
   useEffect(() => {
     if (!userId) return;
 
-    const socket = createSocketConnection();
+    const socket = createSocketConnection(userId);
     socketRef.current = socket;
 
     socket.emit("joinChat", { targetUserId });

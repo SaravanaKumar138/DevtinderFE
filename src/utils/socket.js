@@ -3,8 +3,7 @@ import { io } from "socket.io-client";
 import { url } from "./constants";
 import { useSelector } from "react-redux";
 
-const createSocketConnection = () => {
-  const userId = useSelector((state) => state.user?._id);
+const createSocketConnection = (userId) => {
 
   if (!userId) {
     console.warn("⚠️ Socket not connected: userId missing");
