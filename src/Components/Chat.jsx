@@ -307,19 +307,23 @@ const Chat = () => {
       socket.emit("heartbeat");
     }, 30000);
 
-    socket.emit("checkUserOnline", { targetUserId });
+    const presenceInterval = setInterval(() => {
+      socket.emit("checkUserOnline", { targetUserId });
+    }, 20000);
+socket.on("userPresence", ({ userId, online, lastSeen }) => {
+  if (userId === targetUserId) {
+    setIsTargetOnline(online);
 
-   socket.on("userPresence", ({ userId, online, lastSeen }) => {
-     if (userId === targetUserId) {
-       setIsTargetOnline(online);
-
-       if (!online && lastSeen) {
-         setLastSeen(Number(lastSeen));
-       }
-     }
-   });
+    if (online) {
+      setLastSeen(null); // 🔑 CLEAR lastSeen
+    } else if (lastSeen) {
+      setLastSeen(Number(lastSeen));
+    }
+  }
+});
 
     return () => {
+      clearInterval(presenceInterval);
       socket.off("userPresence");
       clearInterval(heartbeatInterval);
       socket.disconnect();
