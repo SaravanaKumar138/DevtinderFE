@@ -209,6 +209,9 @@ const Chat = () => {
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [isTargetOnline, setIsTargetOnline] = useState(false);
+  const [lastSeen, setLastSeen] = useState(null);
+
 
   const user = useSelector((store) => store.user);
   const userId = user?._id;
@@ -265,6 +268,16 @@ const Chat = () => {
     setNewMessage("");
   };
 
+  const formatLastSeen = (timestamp) => {
+    const diff = Date.now() - timestamp;
+    const seconds = Math.floor(diff / 1000);
+
+    if (seconds < 60) return "just now";
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hr ago`;
+    return `${Math.floor(seconds / 86400)} days ago`;
+  };
+
   /* ---------------- SOCKET INIT ---------------- */
   useEffect(() => {
     if (!userId) return;
@@ -290,9 +303,30 @@ const Chat = () => {
         ]);
       }
     );
+    const heartbeatInterval = setInterval(() => {
+      socket.emit("heartbeat");
+    }, 30000);
 
-    return () => socket.disconnect();
+    socket.emit("checkUserOnline", { targetUserId });
+
+   socket.on("userPresence", ({ userId, online, lastSeen }) => {
+     if (userId === targetUserId) {
+       setIsTargetOnline(online);
+
+       if (!online && lastSeen) {
+         setLastSeen(Number(lastSeen));
+       }
+     }
+   });
+
+    return () => {
+      socket.off("userPresence");
+      clearInterval(heartbeatInterval);
+      socket.disconnect();
+    };
   }, [userId, targetUserId]);
+
+ 
 
   /* ---------------- SCROLL TO BOTTOM ---------------- */
   useEffect(() => {
@@ -317,6 +351,18 @@ const Chat = () => {
           <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-pink-400">
             💬 Chat with {targetUserFirstName}
           </h1>
+          <span className="text-sm text-gray-300 flex items-center gap-2">
+            <span
+              className={`h-2.5 w-2.5 rounded-full ${
+                isTargetOnline ? "bg-green-400" : "bg-gray-400"
+              }`}
+            />
+            {isTargetOnline
+              ? "Online"
+              : lastSeen
+              ? `Last seen ${formatLastSeen(lastSeen)}`
+              : "Offline"}
+          </span>
         </div>
 
         {/* MESSAGES */}
