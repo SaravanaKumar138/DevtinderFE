@@ -110,6 +110,25 @@ const saveChanges = async () => {
   }
 };
 
+useEffect(() => {
+  if (!user) return;
+
+  setFirstName(user.firstName || "");
+  setLastName(user.lastName || "");
+  setAge(user.age ?? "");
+  setGender(user.gender || "");
+  setAbout(user.about || "");
+
+  setExperience(user.experience ?? 0);
+  setRole(user.role || "");
+
+  setPrimarySkill(user.skills?.[0] || "");
+  setSecondarySkill(user.skills?.[1] || "");
+  setTertiarySkill(user.skills?.[2] || "");
+  setExtraSkills(user.skills?.slice(3) || []);
+  setPhotoUrl(user.photoUrl || "");
+}, [user]);
+
 
   return (
     <div className="min-h-screen px-6 py-16 bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white">
