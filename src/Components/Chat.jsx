@@ -13,178 +13,154 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isOnline, setIsOnline] = useState(false);
+
   const user = useSelector((store) => store.user);
   const userId = user?._id;
   const firstName = user?.firstName;
+
+  const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  const socketRef = useRef(null); // Socket reference
+  /* ------------------ Fetch chat history ------------------ */
+  useEffect(() => {
+    if (!targetUserId) return;
 
-  // Fetch initial messages
-  const fetchChatMessages = async () => {
-    try {
-      const chat = await axios.get(`${url}/chat/${targetUserId}`, {
+    const fetchChat = async () => {
+      const res = await axios.get(`${url}/chat/${targetUserId}`, {
         withCredentials: true,
       });
-      const chatMessages = chat?.data?.messages.map((msg) => ({
-        senderUserId: msg?.senderId?._id,
-        firstName: msg?.senderId?.firstName,
-        lastName: msg?.senderId?.lastName,
+
+      const formatted = res.data.messages.map((msg) => ({
+        senderUserId: msg.senderId?._id,
+        firstName: msg.senderId?.firstName,
         text: msg.text,
-        timestamp: new Date(msg?.createdAt).toTimeString().split(" ")[0],
+        timestamp: new Date(msg.createdAt).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
       }));
-      setMessages(chatMessages);
-    } catch (err) {
-      console.error("Failed to fetch chat messages:", err);
-    }
-  };
 
-  // Send message
+      setMessages(formatted);
+    };
+
+    fetchChat();
+  }, [targetUserId]);
+
+  /* ------------------ Socket connection ------------------ */
+  useEffect(() => {
+    if (!userId || !targetUserId) return;
+
+    const socket = createSocketConnection();
+    socketRef.current = socket;
+
+    socket.emit("joinChat", { userId, targetUserId });
+
+    socket.on("messageRecieved", (msg) => {
+      if (msg.senderUserId === userId) return;
+      setMessages((prev) => [...prev, msg]);
+    });
+
+    socket.on("userStatus", ({ userId: uid, status }) => {
+      if (uid === targetUserId) {
+        setIsOnline(status === "online");
+      }
+    });
+
+    return () => {
+      socket.off("messageRecieved");
+      socket.off("userStatus");
+      socket.disconnect();
+    };
+  }, [userId, targetUserId]);
+
+  /* ------------------ Heartbeat ------------------ */
+  useEffect(() => {
+    if (!socketRef.current || !userId) return;
+
+    const interval = setInterval(() => {
+      socketRef.current.emit("heartbeat");
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [userId]);
+
+  /* ------------------ Initial online status ------------------ */
+  useEffect(() => {
+    if (!targetUserId) return;
+
+    const fetchStatus = async () => {
+      const res = await axios.get(`${url}/chat/status/${targetUserId}`);
+      setIsOnline(res.data.status === "online");
+    };
+
+    fetchStatus();
+  }, [targetUserId]);
+
+  /* ------------------ Scroll ------------------ */
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  /* ------------------ Send message ------------------ */
   const sendMessage = () => {
-    if (!newMessage.trim() || !socketRef.current) return;
+    if (!newMessage.trim()) return;
 
-    const now = new Date();
-    const newOptimisticMessage = {
+    const message = {
       senderUserId: userId,
       firstName,
       text: newMessage,
-      timestamp: now.toTimeString().split(" ")[0],
-      isOptimistic: true,
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
     };
 
-    setMessages((prev) => [...prev, newOptimisticMessage]);
+    setMessages((prev) => [...prev, message]);
 
-    // Emit message using the same socket
     socketRef.current.emit("sendMessage", {
-      firstName,
       userId,
       targetUserId,
+      firstName,
       text: newMessage,
-      timestamp: now.toISOString(),
     });
 
     setNewMessage("");
   };
 
-  // Scroll to the latest message
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  // Initialize socket connection
-  useEffect(() => {
-    if (!userId) return;
-
-    socketRef.current = createSocketConnection();
-    const socket = socketRef.current;
-
-    socket.emit("joinChat", { firstName, userId, targetUserId });
-
-    socket.on(
-      "messageRecieved",
-      ({ senderUserId, firstName, text, timestamp }) => {
-        if (senderUserId === userId) return; // Ignore own messages
-
-        const formattedTimestamp = new Date(timestamp)
-          .toTimeString()
-          .split(" ")[0];
-        setMessages((prev) => [
-          ...prev,
-          { senderUserId, firstName, text, timestamp: formattedTimestamp },
-        ]);
-      }
-    );
-    socket.on("userStatus", ({status, userId}) => {
-      if (userId === targetUserId) {
-        setIsOnline(status == "online");
-      }
-    });
-
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [userId, targetUserId]);
-  
-    useEffect(() => {
-      const fetchStatus = async () => {
-        try {
-          const res = await axios.get(`${url}/chat/status/${targetUserId}`);
-          setIsOnline(res.data.status === "online");
-        } catch (err) {
-          console.error("Failed to fetch status");
-        }
-      };
-
-      if (targetUserId) fetchStatus();
-    }, [targetUserId]);
-
-  // Fetch messages on target user change
-  useEffect(() => {
-    fetchChatMessages();
-  }, [targetUserId]);
-
-  // Handle Enter key press
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      sendMessage();
-    }
-  };
-
   return (
-    <div className="w-full md:w-3/5 lg:w-1/2 mx-auto my-5 h-[80vh] flex flex-col bg-gray-900 rounded-xl shadow-2xl">
-      {/* Chat Header */}
-      <div className="p-4 border-b border-gray-700 bg-gray-800 rounded-t-xl">
-        <h1 className="text-xl font-bold text-white">
-          Chat with {targetUserFirstName} {isOnline ? <span className="text-green-400 text-sm">(Online)</span> : <span className="text-gray-500 text-sm">(Offline)</span>}
-        </h1>
+    <div className="max-w-xl mx-auto h-[80vh] flex flex-col bg-gray-900 rounded-xl shadow-lg">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 bg-gray-800 rounded-t-xl">
+        <h2 className="text-white font-semibold">{targetUserFirstName}</h2>
+        <span
+          className={`text-xs font-medium ${
+            isOnline ? "text-green-400" : "text-gray-400"
+          }`}
+        >
+          ● {isOnline ? "Online" : "Offline"}
+        </span>
       </div>
 
-      {/* Message Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-        {messages.map((message, index) => {
-          const isSender = message.senderUserId === userId;
-
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {messages.map((msg, idx) => {
+          const isMe = msg.senderUserId === userId;
           return (
             <div
-              key={index}
-              className={`flex ${isSender ? "justify-end" : "justify-start"}`}
+              key={idx}
+              className={`flex ${isMe ? "justify-end" : "justify-start"}`}
             >
-              <div className="max-w-[70%] lg:max-w-[50%]">
-                <div
-                  className={`flex items-baseline mb-1 ${
-                    isSender ? "flex-row-reverse" : "flex-row"
-                  }`}
-                >
-                  <span
-                    className={`text-xs font-semibold ${
-                      isSender ? "text-pink-400 mr-2" : "text-blue-400 ml-2"
-                    }`}
-                  >
-                    {message.firstName}
-                  </span>
-                  <time className="text-xs opacity-60 text-gray-400">
-                    {message.timestamp}
-                  </time>
-                </div>
-
-                <div
-                  className={`px-4 py-2 rounded-xl text-white shadow-md ${
-                    isSender
-                      ? "bg-pink-600 rounded-tr-none"
-                      : "bg-gray-700 rounded-tl-none"
-                  }`}
-                >
-                  {message.text}
-                </div>
-
-                <div
-                  className={`text-xs opacity-50 text-gray-500 mt-1 ${
-                    isSender ? "text-right" : "text-left"
-                  }`}
-                >
-                  {isSender && <span>Seen</span>}
-                </div>
+              <div
+                className={`max-w-[70%] px-4 py-2 rounded-lg text-sm ${
+                  isMe
+                    ? "bg-pink-600 text-white rounded-br-none"
+                    : "bg-gray-700 text-white rounded-bl-none"
+                }`}
+              >
+                <p>{msg.text}</p>
+                <p className="text-[10px] opacity-60 mt-1 text-right">
+                  {msg.timestamp}
+                </p>
               </div>
             </div>
           );
@@ -192,20 +168,18 @@ const Chat = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="p-4 border-t border-gray-700 flex items-center gap-3 bg-gray-800 rounded-b-xl">
+      {/* Input */}
+      <div className="flex gap-2 p-3 bg-gray-800 rounded-b-xl">
         <input
-          type="text"
+          className="flex-1 px-4 py-2 rounded-lg bg-gray-900 text-white outline-none"
           placeholder="Type a message..."
-          className="flex-1 p-3 bg-gray-900 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-pink-500 transition duration-150"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={handleKeyPress}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
         <button
-          className="btn bg-pink-600 hover:bg-pink-700 border-none text-white font-semibold py-3 px-6 rounded-lg transition duration-150 shadow-lg"
+          className="px-5 py-2 bg-pink-600 rounded-lg text-white font-medium"
           onClick={sendMessage}
-          disabled={!newMessage.trim()}
         >
           Send
         </button>
@@ -215,6 +189,3 @@ const Chat = () => {
 };
 
 export default Chat;
-
-
-
