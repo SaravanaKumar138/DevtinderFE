@@ -12,6 +12,7 @@ const Chat = () => {
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [isOnline, setIsOnline] = useState(false);
   const user = useSelector((store) => store.user);
   const userId = user?._id;
   const firstName = user?.firstName;
@@ -93,11 +94,30 @@ const Chat = () => {
         ]);
       }
     );
+    socket.on("userStatus", ({status, userId}) => {
+      if (userId === targetUserId) {
+        setIsOnline(status == "online");
+      }
+    });
+
 
     return () => {
       socket.disconnect();
     };
   }, [userId, targetUserId]);
+  
+    useEffect(() => {
+      const fetchStatus = async () => {
+        try {
+          const res = await axios.get(`${url}/chat/status/${targetUserId}`);
+          setIsOnline(res.data.status === "online");
+        } catch (err) {
+          console.error("Failed to fetch status");
+        }
+      };
+
+      if (targetUserId) fetchStatus();
+    }, [targetUserId]);
 
   // Fetch messages on target user change
   useEffect(() => {
@@ -116,7 +136,7 @@ const Chat = () => {
       {/* Chat Header */}
       <div className="p-4 border-b border-gray-700 bg-gray-800 rounded-t-xl">
         <h1 className="text-xl font-bold text-white">
-          Chat with {targetUserFirstName}
+          Chat with {targetUserFirstName} {isOnline ? <span className="text-green-400 text-sm">(Online)</span> : <span className="text-gray-500 text-sm">(Offline)</span>}
         </h1>
       </div>
 
