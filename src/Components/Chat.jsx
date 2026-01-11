@@ -5,6 +5,20 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { url } from "../utils/constants";
 
+const formatLastSeen = (dateString) => {
+  if (!dateString) return "a while ago";
+  const now = new Date();
+  const past = new Date(dateString);
+  const diffInMs = now - past;
+  const diffInMins = Math.floor(diffInMs / 60000);
+
+  if (diffInMins < 1) return "just now";
+  if (diffInMins < 60) return `${diffInMins}m ago`;
+  if (diffInMins < 1440) return `${Math.floor(diffInMins / 60)}h ago`;
+  return past.toLocaleDateString();
+};
+
+
 const Chat = () => {
   const { targetUserId } = useParams();
   const location = useLocation();
@@ -13,6 +27,7 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [isOnline, setIsOnline] = useState(false);
+  const [lastSeen, setLastSeen] = useState(null);
 
   const user = useSelector((store) => store.user);
   const userId = user?._id;
@@ -44,6 +59,7 @@ const Chat = () => {
         // Get Online Status
         const statusRes = await axios.get(`${url}/chat/status/${targetUserId}`);
         setIsOnline(statusRes.data.status === "online");
+        setLastSeen(statusRes.data.lastSeen);
       } catch (err) {
         console.error("Fetch error", err);
       }
@@ -66,9 +82,11 @@ const Chat = () => {
       setMessages((prev) => [...prev, msg]);
     });
 
-    socket.on("userStatus", ({ userId: incomingUserId, status }) => {
+    socket.on("userStatus", ({ userId: incomingUserId, status, lastSeen: time }) => {
       if (incomingUserId === targetUserId) {
         setIsOnline(status === "online");
+        if (status === "offline") {
+      }    setLastSeen(time);
       }
     });
 
@@ -134,7 +152,7 @@ const Chat = () => {
               }`}
             ></span>
             <span className="text-xs text-gray-400">
-              {isOnline ? "Online" : "Offline"}
+              {isOnline ? "Online" : `Last seen ${formatLastSeen(lastSeen)}`}
             </span>
           </div>
         </div>
