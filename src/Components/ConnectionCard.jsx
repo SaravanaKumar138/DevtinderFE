@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const ConnectionCard = ({ connection , showMatching = true}) => {
-  const { firstName, lastName, photoUrl, gender, age, about, skills , matchPercentage} = connection;
+  const { firstName, lastName, photoUrl, gender, age, about, skills , matchPercentage, isPremium} = connection;
   const fullName = `${firstName || ""} ${lastName || ""}`.trim();
 
   return (
@@ -19,7 +19,7 @@ const ConnectionCard = ({ connection , showMatching = true}) => {
       {/* INFO */}
       <div className="flex-1">
         <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-pink-400">
-          {fullName}
+          {fullName} {isPremium && <span className="ml-2">⭐</span>}
         </h2>
 
         <div className="flex gap-4 text-sm text-gray-300 mt-1">

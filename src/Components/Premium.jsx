@@ -218,7 +218,7 @@ const Premium = () => {
           </h2>
 
           <ul className="text-gray-300 space-y-3 text-center mb-8">
-            <li>✔ Verified Account Badge</li>
+            
             <li>✔ Priority Feature Access</li>
             <li>✔ 3 Months Validity</li>
           </ul>
@@ -249,7 +249,7 @@ const Premium = () => {
           <ul className="text-gray-300 space-y-3 text-center mb-8">
             <li>✔ Verified Account Badge</li>
             <li>✔ Priority Feature Access</li>
-            <li>✔ 6 Months Validity</li>
+            <li>✔ 12 Months Validity</li>
           </ul>
 
           <div className="text-center text-4xl font-bold text-yellow-400 mb-6">
