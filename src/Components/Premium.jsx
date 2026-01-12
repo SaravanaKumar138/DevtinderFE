@@ -147,7 +147,7 @@ import { addUser } from "../utils/userSlice";
 
 const Premium = () => {
   const [isPremium, setIsPremium] = useState(false);
-  const dispatch = useDispatch();
+
   const user = useSelector((store) => store.user);
 
   const handlePayment = async (plan) => {
@@ -193,8 +193,7 @@ const Premium = () => {
       const res = await axios.get(url+"/payment/premium/verify", {withCredentials: true});
       console.log(res.data);
       const {isPremium} = res.data;
-      dispatch(addUser({ ...user, isPremium: isPremium }));
-      if (isPremium) {
+ if (isPremium) {
         setIsPremium(true);
       }
      

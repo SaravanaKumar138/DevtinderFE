@@ -6,11 +6,9 @@ import ConnectionCard from "./ConnectionCard";
 import { addUser } from "../utils/userSlice";
 
 const SmartMatches = () => {
-  const [userPremium, setUserPremium] = useState(false);
   const userData = useSelector((store) => store.user);
   console.log("User Data:", userData);
   const [matches, setMatches] = useState([]);
-  const dispatch = useDispatch();
 
   const skills = userData?.skills || [];
   const experience = userData?.experience;
@@ -31,24 +29,7 @@ const SmartMatches = () => {
       console.error(err.response?.data || err.message);
     }
   };
- useEffect(() => {
-  verifyPremiumUser();
-  }, []);
-    const verifyPremiumUser = async () => {
-      try {
-        const res = await axios.get(url + "/payment/premium/verify", {
-          withCredentials: true,
-        });
-        console.log(res.data);
-        const { isPremium } = res.data;
-        dispatch(addUser({ ...user, isPremium: isPremium }));
-        if (isPremium) {
-          setUserPremium(true);
-        }
-      } catch (err) {
-        console.error("Verification error", err);
-      }
-    };
+
   useEffect(() => {
     // 🔒 Premium + skills required
     if (hasSkills && isPremium) {
@@ -66,19 +47,6 @@ const SmartMatches = () => {
   }
 
   // 🔒 Not a premium user → hard block
-  if (!userPremium) {
-    return (
-      <div className="max-w-xl mx-auto mt-20 text-center bg-yellow-100 border border-yellow-400 text-yellow-800 p-8 rounded-lg">
-        <h2 className="text-2xl font-bold mb-4">Premium Feature 🔒</h2>
-        <p className="mb-6">
-          Smart Matches are available only for Premium users.
-        </p>
-        <button className="px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600">
-          Upgrade to Premium
-        </button>
-      </div>
-    );
-  }
 
   // ✅ Premium user view
   return (
