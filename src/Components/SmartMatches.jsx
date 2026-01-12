@@ -32,10 +32,10 @@ const SmartMatches = () => {
 
   useEffect(() => {
     // 🔒 Premium + skills required
-    if (hasSkills && isPremium) {
+    if (hasSkills ) {
       fetchUsers();
     }
-  }, [hasSkills, isPremium]);
+  }, [hasSkills]);
 
   // ❌ No skills
   if (!hasSkills) {
