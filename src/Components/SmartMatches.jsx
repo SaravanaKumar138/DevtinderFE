@@ -10,7 +10,7 @@ const SmartMatches = () => {
 
   const skills = userData?.skills || [];
   const experience = userData?.experience;
-  const { isPremiumUser } = userData || {};
+  const { isPremium } = userData || {};
 
   const hasSkills = skills.length > 0;
 
@@ -31,10 +31,10 @@ const SmartMatches = () => {
 
   useEffect(() => {
     // 🔒 Premium + skills required
-    if (hasSkills && isPremiumUser) {
+    if (hasSkills && isPremium) {
       fetchUsers();
     }
-  }, [hasSkills, isPremiumUser]);
+  }, [hasSkills, isPremium]);
 
   // ❌ No skills
   if (!hasSkills) {
@@ -46,7 +46,7 @@ const SmartMatches = () => {
   }
 
   // 🔒 Not a premium user → hard block
-  if (!isPremiumUser) {
+  if (!isPremium) {
     return (
       <div className="max-w-xl mx-auto mt-20 text-center bg-yellow-100 border border-yellow-400 text-yellow-800 p-8 rounded-lg">
         <h2 className="text-2xl font-bold mb-4">Premium Feature 🔒</h2>
