@@ -138,6 +138,7 @@
 // };
 
 // export default Premium;
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { url } from "../utils/constants";
@@ -192,10 +193,11 @@ const Premium = () => {
       const res = await axios.get(url+"/payment/premium/verify", {withCredentials: true});
       console.log(res.data);
       const {isPremium} = res.data;
+      dispatch(addUser({ ...user, isPremium: isPremium }));
       if (isPremium) {
         setIsPremium(true);
       }
-      dispatch(addUser({...user, isPremium: isPremium}) );
+     
     }
     catch(err) {
       console.error("Verification error", err);

@@ -1,16 +1,19 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { url } from "../utils/constants";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ConnectionCard from "./ConnectionCard";
+import { addUser } from "../utils/userSlice";
 
 const SmartMatches = () => {
+  const [userPremium, setUserPremium] = useState(false);
   const userData = useSelector((store) => store.user);
+  console.log("User Data:", userData);
   const [matches, setMatches] = useState([]);
+  const dispatch = useDispatch();
 
   const skills = userData?.skills || [];
   const experience = userData?.experience;
-  const { isPremium } = userData || {};
 
   const hasSkills = skills.length > 0;
 
@@ -28,7 +31,24 @@ const SmartMatches = () => {
       console.error(err.response?.data || err.message);
     }
   };
-
+ useEffect(() => {
+  verifyPremiumUser();
+  }, []);
+    const verifyPremiumUser = async () => {
+      try {
+        const res = await axios.get(url + "/payment/premium/verify", {
+          withCredentials: true,
+        });
+        console.log(res.data);
+        const { isPremium } = res.data;
+        dispatch(addUser({ ...user, isPremium: isPremium }));
+        if (isPremium) {
+          setUserPremium(true);
+        }
+      } catch (err) {
+        console.error("Verification error", err);
+      }
+    };
   useEffect(() => {
     // 🔒 Premium + skills required
     if (hasSkills && isPremium) {
@@ -46,7 +66,7 @@ const SmartMatches = () => {
   }
 
   // 🔒 Not a premium user → hard block
-  if (!isPremium) {
+  if (!userPremium) {
     return (
       <div className="max-w-xl mx-auto mt-20 text-center bg-yellow-100 border border-yellow-400 text-yellow-800 p-8 rounded-lg">
         <h2 className="text-2xl font-bold mb-4">Premium Feature 🔒</h2>
