@@ -145,7 +145,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../utils/userSlice";
 
 const Premium = () => {
-  const [isPremiumUser, setIsPremiumUser] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector((store) => store.user);
 
@@ -193,9 +193,9 @@ const Premium = () => {
       console.log(res.data);
       const {isPremium} = res.data;
       if (isPremium) {
-        setIsPremiumUser(true);
+        setIsPremium(true);
       }
-      dispatch(addUser({...user, isPremiumUser: isPremium}) );
+      dispatch(addUser({...user, isPremium: isPremium}) );
     }
     catch(err) {
       console.error("Verification error", err);
@@ -205,7 +205,7 @@ const Premium = () => {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white flex flex-col items-center justify-center px-6">
       {/* Title */}
-      {isPremiumUser ? (
+      {isPremium ? (
         <h1 className="text-4xl font-extrabold text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">
           You are a Premium Member! 🚀
         </h1>
