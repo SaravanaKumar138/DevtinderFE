@@ -50,11 +50,8 @@ const SmartMatches = () => {
 
     if (loading) return <Loading />; 
 
-  // 🔒 Not a premium user → hard block
-
-  // ✅ Premium user view
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]">
+    <div className="min-h-screen px-6 py-16 flex flex-col items-center  bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]">
       <h1 className="text-4xl md:text-5xl font-extrabold text-center mb-12 bg-clip-text text-transparent ">
         Smart Matches
       </h1>
