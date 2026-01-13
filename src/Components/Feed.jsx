@@ -125,26 +125,26 @@ const Feed = () => {
   }
 
   /*  EMPTY FEED  */
-  if ((!feedData || feedData.length === 0) && !hasMore) {
+  if (!feedData || feedData.length === 0)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#1d1b31] text-white">
-        <h1 className="text-3xl font-bold text-[#d8b4fe] animate-pulse">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white">
+        <h1 className="text-3xl font-bold text-gray-300 animate-pulse">
           No more users found 🚀
         </h1>
       </div>
     );
-  }
 
+  /* ✅ FEED UI */
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start bg-[#1d1b31] text-white px-4 pt-10">
-      {/* Section title matching your UI theme */}
-      <h1 className="text-4xl md:text-5xl font-extrabold text-[#d8b4fe] text-center mb-10 tracking-tight">
+    <div className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white px-4">
+      {/* Section title */}
+      <h1 className="text-3xl md:text-4xl font-bold  mb-2 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-pink-400 to-purple-400">
         Discover Developers
       </h1>
 
       {/* Card wrapper */}
       <div className="flex items-start justify-center w-full">
-        {feedData && feedData.length > 0 && <UserCard user={feedData[0]} />}
+        <UserCard user={feedData[0]} />
       </div>
     </div>
   );
