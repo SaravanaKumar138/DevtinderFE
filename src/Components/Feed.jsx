@@ -78,7 +78,7 @@ const Feed = () => {
   const [hasMore, setHasMore] = useState(true); // Track if there's more data to fetch
   const feedData = useSelector((store) => store.feed);
 
-  const limit = 10; // Set your limit per request
+  const limit = 10; // Set  limit per request
 
   const getFeed = async () => {
     try {
@@ -118,13 +118,13 @@ const Feed = () => {
     }
   }, [feedData, loading, hasMore]);
 
-  /* 🔄 LOADING STATE */
+ 
   // Only show loading screen on the very first load or when switching pages
   if (loading && (!feedData || feedData.length === 0)) {
     return <Loading />;
   }
 
-  /* ❌ EMPTY FEED (TRULY NO MORE USERS) */
+  /*  EMPTY FEED  */
   if ((!feedData || feedData.length === 0) && !hasMore) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#1d1b31] text-white">
@@ -135,7 +135,6 @@ const Feed = () => {
     );
   }
 
-  /* ✅ FEED UI */
   return (
     <div className="min-h-screen flex flex-col items-center justify-start bg-[#1d1b31] text-white px-4 pt-10">
       {/* Section title matching your UI theme */}
