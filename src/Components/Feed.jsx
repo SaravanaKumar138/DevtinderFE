@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addFeed } from "../utils/feedSlice";
 import axios from "axios";
 import UserCard from "./UserCard";
+import Loading from "./Loading";
 
 const Feed = () => {
   const dispatch = useDispatch();
@@ -30,9 +31,7 @@ const Feed = () => {
   /* 🔄 LOADING STATE */
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]">
-        <span className="loading loading-spinner w-20 h-20 text-indigo-400"></span>
-      </div>
+     <Loading />
     );
 
   /* ❌ EMPTY FEED */

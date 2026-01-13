@@ -1,13 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { url } from "../utils/constants";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { addConnections } from "../utils/connectionSlice";
 import ConnectionCard from "./ConnectionCard";
+import Loading from "./Loading";
 
 const Connections = () => {
   const dispatch = useDispatch();
   const connections = useSelector((store) => store.connections);
+  const [loading, setLoading] = useState(true);
 
   const fetchConnections = async () => {
     try {
@@ -15,6 +17,7 @@ const Connections = () => {
         withCredentials: true,
       });
       dispatch(addConnections(res?.data?.data));
+      setLoading(false);
     } catch (err) {
       console.error("Failed to fetch connections:", err);
     }
@@ -24,6 +27,8 @@ const Connections = () => {
     fetchConnections();
   }, []);
 
+  if (loading) return <Loading />;
+  
   if (!connections) return null;
 
   if (connections.length === 0) {

@@ -1,155 +1,16 @@
-// import React, { useEffect, useState } from "react";
-// import { url } from "../utils/constants";
-// import axios from "axios";
-
-// const Premium = () => {
-//   const [isPremiumUser, setIsPremiumUser] = useState(false);
-
-//   const loadRazorpay = () => {
-//   return new Promise((resolve, reject) => {
-//     // If already loaded, resolve immediately
-//     if (window.Razorpay) {
-//       resolve(true);
-//       return;
-//     }
-
-//     const script = document.createElement("script");
-//     script.src = "https://checkout.razorpay.com/v1/checkout.js";
-//     script.async = true;
-
-//     script.onload = () => resolve(true);
-//     script.onerror = () => reject(new Error("Razorpay SDK failed to load"));
-
-//     document.body.appendChild(script);
-//   })};
-
-//   const handleClick = async (plan) => {
-//     try {
-//        await loadRazorpay();
-//       const order = await axios.post(
-//         url + "/payment/create",
-//         { plan },
-//         { withCredentials: true }
-//       );
-//       const {amount, currency, notes, keyId, orderId} = order.data;
-//       const options = {
-//         key: keyId, // Replace with your Razorpay key_id
-//         amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-//         currency,
-//         name: "DevTinder",
-//         description: "Connect to other Developers",
-//         order_id: orderId, // This is the order_id created in the backend// Your success URL
-//         prefill: {
-//           name: notes.firstName+ " "+notes.lastName,
-//           email: notes.emailId,
-//           contact: "9999999999",
-//         },
-//         theme: {
-//           color: "#F37254",
-//         },
-//         handler: verifyPremiumUser,
-//       };
-//       const rzp = new window.Razorpay(options);
-//       rzp.open();
-     
-//     } catch (error) {
-//       console.error("Error initiating payment:", error);
-//     }
-//   };
-
-//   const verifyPremiumUser = async () => {
-//   try {
-//     const res = await axios.get(url+"/payment/premium/verify", {withCredentials: true});
-//     if (res.data.isPremium) {
-//       setIsPremiumUser(true);
-//     }
-//   }
-//   catch(err) {
-
-//   }
-//   }
-//     useEffect(() => {
-//       verifyPremiumUser();
-//     }, []);
-//   return !isPremiumUser ? (
-//     <div className="w-full min-h-screen flex items-center justify-center px-6">
-//       <div className="flex flex-col lg:flex-row items-center gap-10 w-full max-w-6xl">
-//         {/* Silver */}
-//         <div className="w-full bg-[#0f172a] border border-blue-900/40 hover:border-blue-400 rounded-2xl p-10 shadow-lg hover:shadow-blue-500/30 hover:-translate-y-1 transition-all duration-300">
-//           <h2 className="text-3xl font-semibold text-blue-300 text-center mb-5">
-//             Silver Membership
-//           </h2>
-
-//           <ul className="text-gray-300 space-y-3 text-center mb-8">
-//             <li className="hover:text-blue-300 transition">
-//               Verified Account Badge
-//             </li>
-//             <li className="hover:text-blue-300 transition">
-//               Priority Feature Access
-//             </li>
-//           </ul>
-
-//           <div className="text-center text-blue-400 text-4xl font-bold mb-6">
-//             ₹99 <span className="text-lg text-blue-300">/month</span>
-//           </div>
-
-//           <button
-//             className="w-full py-3 rounded-xl btn btn-primary text-white font-semibold transition"
-//             onClick={() => handleClick("silver")}
-//           >
-//             Choose Silver
-//           </button>
-//         </div>
-
-//         <div className="text-gray-400 text-lg font-semibold">OR</div>
-
-//         {/* Gold */}
-//         <div className="w-full bg-[#0f172a] border border-blue-900/40 hover:border-blue-400 rounded-2xl p-10 shadow-lg hover:shadow-blue-400/40 hover:-translate-y-1 transition-all duration-300">
-//           <h2 className="text-3xl font-semibold text-blue-200 text-center mb-5">
-//             Gold Membership
-//           </h2>
-
-//           <ul className="text-gray-300 space-y-3 text-center mb-8">
-//             <li className="hover:text-blue-200 transition">
-//               Verified Account Badge
-//             </li>
-           
-//             <li className="hover:text-blue-200 transition">
-//               Priority Feature Access
-//             </li>
-//           </ul>
-
-//           <div className="text-center text-blue-300 text-4xl font-bold mb-6">
-//             ₹199 <span className="text-lg text-blue-200">/month</span>
-//           </div>
-
-//           <button
-//             className="w-full py-3 rounded-xl btn btn-secondary text-slate-900 font-semibold transition"
-//             onClick={() => handleClick("gold")}
-//           >
-//             Choose Gold
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   ) : (
-//     "You are a Premium User Now!"
-//   );
-// };
-
-// export default Premium;
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { url } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../utils/userSlice";
+import Loading from "./Loading";
 
 const Premium = () => {
   const [isPremium, setIsPremium] = useState(false);
-
-  const user = useSelector((store) => store.user);
-
+  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+ const user = useSelector((store) => store.user);
   const handlePayment = async (plan) => {
     try {
       const res = await axios.post(
@@ -184,6 +45,7 @@ const Premium = () => {
       console.error("Payment error", err);
     }
   };
+
   useEffect(() => {
   verifyPremiumUser();
   }, []);
@@ -196,13 +58,14 @@ const Premium = () => {
  if (isPremium) {
         setIsPremium(true);
       }
-     
+      dispatch(addUser({...user, isPremium}));
+     setLoading(false);
     }
     catch(err) {
       console.error("Verification error", err);
     }
   }
-
+  if (loading) return <Loading />;
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white flex flex-col items-center justify-center px-6">
       {/* Title */}
