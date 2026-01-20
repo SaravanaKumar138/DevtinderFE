@@ -5,6 +5,7 @@ import { url } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import Loading from "./Loading";
+import loadRazorpay from "../utils/loadRazorPay";
 
 const Premium = () => {
   const [isPremium, setIsPremium] = useState(false);
@@ -13,6 +14,11 @@ const Premium = () => {
  const user = useSelector((store) => store.user);
   const handlePayment = async (plan) => {
     try {
+       const isLoaded = await loadRazorpay();
+
+       if (!isLoaded) {
+         throw new Error("Razorpay SDK failed to load");
+       }
       const res = await axios.post(
         url + "/payment/create",
         { plan },

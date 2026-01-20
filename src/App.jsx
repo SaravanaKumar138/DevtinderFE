@@ -7,15 +7,17 @@ import Body from "./Components/Body";
 import Login from "./Components/Login";
 import Profile from "./Components/Profile";
 import appStore from "./utils/appStore";
-
+import {lazy, Suspense} from "react";
 import { Provider } from "react-redux";
 import Feed from "./Components/Feed";
 import Connections from "./Components/Connections";
 import Requests from "./Components/Requests";
 import Chat from "./Components/Chat";
-import Premium from "./Components/Premium";
 import Home from "./Components/Home";
 import SmartMatches from "./Components/SmartMatches";
+import Loading from "./Components/Loading";
+
+const Premium = lazy(() => import("./Components/Premium"));
 
 function App() {
   return (
@@ -35,7 +37,7 @@ function App() {
               <Route path="/requests" element={<Requests />} />
               <Route path="/matches" element={<SmartMatches />} />,
               <Route path="/chat/:targetUserId" element={<Chat />} />
-              <Route path="/premium" element={<Premium />} />
+              <Route path="/premium" element={<Suspense fallback={<Loading />}><Premium /></Suspense>} />
             </Route>
           </Routes>
         </BrowserRouter>
