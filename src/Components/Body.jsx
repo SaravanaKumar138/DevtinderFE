@@ -28,7 +28,7 @@ const Body = () => {
   };
   useEffect(() => {
     if (!user) fetchUser();
-  }, []);
+  }, [user]);
   return (
     <div>
       <Navbar />

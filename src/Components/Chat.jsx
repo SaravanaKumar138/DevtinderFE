@@ -18,7 +18,6 @@ const formatLastSeen = (dateString) => {
   return past.toLocaleDateString();
 };
 
-
 const Chat = () => {
   const { targetUserId } = useParams();
   const location = useLocation();
@@ -36,18 +35,17 @@ const Chat = () => {
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  /* 1. Fetch initial status & chat history */
+  /* 1. Fetch History & Status */
   useEffect(() => {
     if (!targetUserId) return;
 
     const fetchData = async () => {
       try {
-        // Get History
         const chatRes = await axios.get(`${url}/chat/${targetUserId}`, {
           withCredentials: true,
         });
         const formatted = chatRes.data.messages.map((msg) => ({
-          senderUserId: msg.senderId?._id || msg.senderId, // Handle both populated and unpopulated
+          senderUserId: msg.senderId?._id || msg.senderId,
           text: msg.text,
           timestamp: new Date(msg.createdAt).toLocaleTimeString([], {
             hour: "2-digit",
@@ -56,7 +54,6 @@ const Chat = () => {
         }));
         setMessages(formatted);
 
-        // Get Online Status
         const statusRes = await axios.get(`${url}/chat/status/${targetUserId}`);
         setIsOnline(statusRes.data.status === "online");
         setLastSeen(statusRes.data.lastSeen);
@@ -77,23 +74,30 @@ const Chat = () => {
 
     socket.emit("joinChat", { userId, targetUserId });
 
+    // Listen for messages
     socket.on("messageRecieved", (msg) => {
-      // Logic: Only append if it's from the person we are currently chatting with
-      setMessages((prev) => [...prev, msg]);
-    });
-
-    socket.on("userStatus", ({ userId: incomingUserId, status, lastSeen: time }) => {
-      if (incomingUserId === targetUserId) {
-        setIsOnline(status === "online");
-        if (status === "offline") {
-      }    setLastSeen(time);
+      // Check if message is from the user we are currently talking to
+      if (msg.senderUserId === targetUserId) {
+        setMessages((prev) => [...prev, msg]);
       }
     });
+
+    // Listen for status changes
+    socket.on(
+      "userStatus",
+      ({ userId: incomingUserId, status, lastSeen: time }) => {
+        if (incomingUserId === targetUserId) {
+          setIsOnline(status === "online");
+          setLastSeen(time);
+        }
+      },
+    );
 
     return () => {
       socket.off("messageRecieved");
       socket.off("userStatus");
-      socket.disconnect();
+      // Don't disconnect here if you want the user to stay online while browsing other pages
+      // socket.disconnect();
     };
   }, [userId, targetUserId]);
 
@@ -125,10 +129,10 @@ const Chat = () => {
       }),
     };
 
-    // Update local UI immediately (Sender sees their message)
+    // Update local UI
     setMessages((prev) => [...prev, messageData]);
 
-    // Send to server
+    // Emit to server
     socketRef.current.emit("sendMessage", {
       userId,
       targetUserId,
@@ -141,15 +145,12 @@ const Chat = () => {
 
   return (
     <div className="max-w-xl mx-auto h-[80vh] flex flex-col bg-gray-900 rounded-xl shadow-lg border border-gray-700">
-      {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-gray-800 rounded-t-xl border-b border-gray-700">
         <div>
           <h2 className="text-white font-semibold">{targetUserFirstName}</h2>
           <div className="flex items-center gap-1">
             <span
-              className={`w-2 h-2 rounded-full ${
-                isOnline ? "bg-green-500" : "bg-gray-500"
-              }`}
+              className={`w-2 h-2 rounded-full ${isOnline ? "bg-green-500" : "bg-gray-500"}`}
             ></span>
             <span className="text-xs text-gray-400">
               {isOnline ? "Online" : `Last seen ${formatLastSeen(lastSeen)}`}
@@ -158,7 +159,6 @@ const Chat = () => {
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
         {messages.map((msg, idx) => {
           const isMe = msg.senderUserId === userId;
@@ -168,11 +168,7 @@ const Chat = () => {
               className={`flex ${isMe ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm shadow-md ${
-                  isMe
-                    ? "bg-pink-600 text-white rounded-br-none"
-                    : "bg-gray-700 text-white rounded-bl-none"
-                }`}
+                className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm shadow-md ${isMe ? "bg-pink-600 text-white rounded-br-none" : "bg-gray-700 text-white rounded-bl-none"}`}
               >
                 <p>{msg.text}</p>
                 <p className="text-[10px] opacity-60 mt-1 text-right">
@@ -185,7 +181,6 @@ const Chat = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <div className="flex gap-2 p-3 bg-gray-800 rounded-b-xl border-t border-gray-700">
         <input
           className="flex-1 px-4 py-2 rounded-lg bg-gray-900 text-white outline-none focus:ring-2 focus:ring-pink-500"
