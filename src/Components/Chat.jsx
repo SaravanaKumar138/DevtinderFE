@@ -139,7 +139,7 @@ const Chat = () => {
               {message.firstName} {message.lastName}
             </div>
             <div
-              className={`chat-bubble ${message.senderId === loggedInUserId ? "chat-bubble-primary" : ""}`}
+              className={`chat-bubble ${message.senderId === loggedInUserId ? "chat-bubble-secondary" : "chat-bubble-primary"}`}
             >
               {message.text}
             </div>
