@@ -186,6 +186,7 @@ const Chat = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef(null);
+  const isInitialLoad = useRef(true);
   // ------------------------------
 
   const socketRef = useRef(null);
@@ -235,6 +236,16 @@ const Chat = () => {
       setIsLoading(false);
     }
   };
+  //0.Auto scroll to bottom
+  useEffect(() => {
+    if (!scrollRef.current) return;
+
+    // Only auto-scroll on first load
+    if (isInitialLoad.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      isInitialLoad.current = false;
+    }
+  }, [messages]);
 
   // 1. Initial Load: Reset everything when switching users
   useEffect(() => {
