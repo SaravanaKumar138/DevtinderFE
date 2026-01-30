@@ -67,16 +67,11 @@ const Home = () => {
             desc="Find developers who share your tech stack and interests."
           />
 
-          <FeatureCard
-            icon={<FaProjectDiagram />}
-            title="Project Collaboration"
-            desc="Start or join exciting projects that match your skills."
-          />
 
           <FeatureCard
             icon={<FaChartLine />}
             title="Skill Growth"
-            desc="Learn from peers and enhance your coding abilities."
+            desc="Learn from peers and enhance your abilities."
           />
 
           <FeatureCard
