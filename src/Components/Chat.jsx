@@ -324,7 +324,7 @@ const Chat = () => {
   };
 
   return (
-    <div className="w-1/2 m-auto mt-10 border border-gray-600 h-[70vh] flex flex-col bg-base-100 rounded-xl overflow-hidden shadow-xl">
+    <div className="w-1/2 m-auto mt-10 border border-gray-600 h-[70vh] flex flex-col bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] rounded-xl overflow-hidden shadow-xl">
       {/* HEADER */}
       <div className="border-b border-gray-600 p-4 flex justify-between items-center bg-base-200">
         <h1 className="font-bold text-lg">Chat</h1>
