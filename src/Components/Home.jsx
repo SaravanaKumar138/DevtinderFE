@@ -60,7 +60,7 @@ const Home = () => {
           Why Choose DevTinder?
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto ">
           <FeatureCard
             icon={<FaUsers />}
             title="Match with Developers"
