@@ -14,6 +14,7 @@ const SKILL_OPTIONS = [
   "aws",
 ];
 
+const LEVEL_OPTIONS = ["beginner", "intermediate", "advanced"];
 
 const EditProfile = ({ user }) => {
   const dispatch = useDispatch();
@@ -29,9 +30,13 @@ console.log(user);
   const [image, setImage] = useState(null);
 
   // 🔹 CORE SKILLS
-  const [primarySkill, setPrimarySkill] = useState(user.skills?.[0] || "");
-  const [secondarySkill, setSecondarySkill] = useState(user.skills?.[1] || "");
+  const [primarySkill, setPrimarySkill] = useState(user.skills?.[0]?.name || "");
+  const [secondarySkill, setSecondarySkill] = useState(user.skills?.[1]?.name || "");
   const [tertiarySkill, setTertiarySkill] = useState(user.skills?.[2] || "");
+
+  const [primaryLevel, setPrimaryLevel] = useState(user.skills?.[0].level || "beginner");
+  const [secondaryLevel, setSecondaryLevel] = useState(user.skills?.[1]?.level || "beginner");
+  const [tertiaryLevel, setTertiaryLevel] = useState(user.skills?.[2]?.level || "beginner");
 
   // 🔹 EXTRA SKILLS
   const [extraSkills, setExtraSkills] = useState(user.skills?.slice(3) || []);
@@ -89,10 +94,10 @@ const saveChanges = async () => {
         gender,
         about,
         skills: [
-          primarySkill,
-          secondarySkill,
-          tertiarySkill,
-          ...extraSkills,
+          {name: primarySkill, level: primaryLevel},
+          {name: secondarySkill, level: secondaryLevel},
+          {name: tertiarySkill, level: tertiaryLevel},
+          ...extraSkills.map((skill) => ({ name: skill, level: "beginner" })) ,
         ].filter(Boolean),
       },
       { withCredentials: true }
@@ -216,10 +221,11 @@ useEffect(() => {
             </label>
 
             {[
-              ["Primary Skill", primarySkill, setPrimarySkill],
-              ["Secondary Skill", secondarySkill, setSecondarySkill],
-              ["Additional Skill", tertiarySkill, setTertiarySkill],
-            ].map(([label, value, setter]) => (
+              ["Primary Skill", primarySkill, setPrimarySkill, primaryLevel, setPrimaryLevel],
+              ["Secondary Skill", secondarySkill, setSecondarySkill, secondaryLevel, setSecondaryLevel],
+              ["Additional Skill", tertiarySkill, setTertiarySkill, tertiaryLevel, setTertiaryLevel],
+            ].map(([label, value, setter, levelValue, setLevel]) => (
+              <div>
               <select
                 key={label}
                 value={value}
@@ -239,8 +245,21 @@ useEffect(() => {
                   >
                     {skill}
                   </option>
+                  
                 ))}
               </select>
+                <select
+                  value={levelValue}
+                  onChange={(e) => setLevel(e.target.value)}
+                  className="ml-2 px-4 py-2 rounded-lg bg-black/40 border border-white/10 focus:border-indigo-400 outline-none"
+                >
+                  {LEVEL_OPTIONS.map((level) => (
+                    <option key={level} value={level}>
+                      {level}
+                    </option>
+                  ))}
+                </select>
+             </div>
             ))}
 
             {/* EXTRA SKILLS */}
