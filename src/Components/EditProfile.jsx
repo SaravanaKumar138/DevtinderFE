@@ -219,49 +219,69 @@ useEffect(() => {
             <label className="text-sm text-gray-300 block mb-2">
               🛠 Core Skills (Top 3)
             </label>
-
             {[
-              ["Primary Skill", primarySkill, setPrimarySkill, primaryLevel, setPrimaryLevel],
-              ["Secondary Skill", secondarySkill, setSecondarySkill, secondaryLevel, setSecondaryLevel],
-              ["Additional Skill", tertiarySkill, setTertiarySkill, tertiaryLevel, setTertiaryLevel],
+              [
+                "Primary Skill",
+                primarySkill,
+                setPrimarySkill,
+                primaryLevel,
+                setPrimaryLevel,
+              ],
+              [
+                "Secondary Skill",
+                secondarySkill,
+                setSecondarySkill,
+                secondaryLevel,
+                setSecondaryLevel,
+              ],
+              [
+                "Additional Skill",
+                tertiarySkill,
+                setTertiarySkill,
+                tertiaryLevel,
+                setTertiaryLevel,
+              ],
             ].map(([label, value, setter, levelValue, setLevel]) => (
-              <div>
-              <select
-                key={label}
-                value={value}
-                onChange={(e) => setter(e.target.value)}
-                className="mb-3 w-full px-4 py-2 rounded-lg bg-black/40 border border-white/10 focus:border-indigo-400 outline-none"
-              >
-                <option value="">{label}</option>
-                {SKILL_OPTIONS.map((skill) => (
-                  <option
-                    key={skill}
-                    value={skill}
-                    disabled={[
-                      primarySkill,
-                      secondarySkill,
-                      tertiarySkill,
-                    ].includes(skill)}
-                  >
-                    {skill}
-                  </option>
-                  
-                ))}
-              </select>
+              <div key={label} className="mb-3 flex gap-2">
+                {/* Skill dropdown */}
+                <select
+                  value={value}
+                  onChange={(e) => setter(e.target.value)}
+                  className="flex-1 px-4 py-2 rounded-lg bg-black/40 border border-white/10 focus:border-indigo-400 outline-none"
+                >
+                  <option value="">{label}</option>
+
+                  {SKILL_OPTIONS.map((skill) => (
+                    <option
+                      key={skill}
+                      value={skill}
+                      disabled={[
+                        primarySkill,
+                        secondarySkill,
+                        tertiarySkill,
+                      ].includes(skill)}
+                    >
+                      {skill}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Level dropdown */}
                 <select
                   value={levelValue}
-                  onChange={(e) => setLevel(e.target.value)}
-                  className="ml-2 px-4 py-2 rounded-lg bg-black/40 border border-white/10 focus:border-indigo-400 outline-none"
+                  onChange={(e) => setLevel(Number(e.target.value))}
+                  disabled={!value}
+                  className="w-24 px-3 py-2 rounded-lg bg-black/40 border border-white/10 focus:border-indigo-400 outline-none"
                 >
+                  <option value="">Lvl</option>
                   {LEVEL_OPTIONS.map((level) => (
                     <option key={level} value={level}>
                       {level}
                     </option>
                   ))}
                 </select>
-             </div>
+              </div>
             ))}
-
             {/* EXTRA SKILLS */}
             <label className="text-sm text-gray-400 block mb-1">
               ➕ Other skills (optional)
@@ -316,12 +336,22 @@ useEffect(() => {
           </h3>
           <UserCard
             isPreview
-            user={{ firstName, lastName, photoUrl, age, gender, about , role, experience, skills: [
-              primarySkill,
-              secondarySkill,
-              tertiarySkill,
-              ...extraSkills,
-            ].filter(Boolean)}}
+            user={{
+              firstName,
+              lastName,
+              photoUrl,
+              age,
+              gender,
+              about,
+              role,
+              experience,
+              skills: [
+                primarySkill,
+                secondarySkill,
+                tertiarySkill,
+                ...extraSkills,
+              ].filter(Boolean),
+            }}
           />
         </div>
       </div>
