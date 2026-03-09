@@ -96,14 +96,20 @@ const saveChanges = async () => {
         gender,
         about,
         skills: [
-          {name: primarySkill, level: primaryLevel},
-          {name: secondarySkill, level: secondaryLevel},
-          {name: tertiarySkill, level: tertiaryLevel},
-          ...extraSkills.map((skill) => ({ name: skill, level: "beginner" })) ,
-        ].filter(Boolean),
+          { name: primarySkill, level: primaryLevel },
+          { name: secondarySkill, level: secondaryLevel },
+          { name: tertiarySkill, level: tertiaryLevel },
+          ...extraSkills.map((skill) => ({ name: skill, level: "beginner" })),
+        ].filter((skill) => skill.name),
       },
-      { withCredentials: true }
+      { withCredentials: true },
     );
+    console.log("Skills sending:", [
+      { name: primarySkill, level: primaryLevel },
+      { name: secondarySkill, level: secondaryLevel },
+      { name: tertiarySkill, level: tertiaryLevel },
+      ...extraSkills.map((skill) => ({ name: skill, level: "beginner" })),
+    ]);
 
     dispatch(addUser(res.data.data));
 
