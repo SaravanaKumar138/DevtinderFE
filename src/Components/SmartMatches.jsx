@@ -129,6 +129,20 @@ const SmartMatches = () => {
     }
   };
 
+  const handleSendRequest = async (status, userId) => {
+    try {
+      await axios.post(
+        `${url}/request/send/${status}/${userId}`,
+        {},
+        { withCredentials: true }
+      );
+      setMatches((prev) => prev.filter((match) => match._id !== userId));
+    } catch (err) {
+      console.error(err.response?.data || err.message);
+      setError("Could not send request right now. Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen px-6 py-16 flex flex-col items-center bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e]">
       <h1 className="text-4xl md:text-5xl font-extrabold text-center mb-8 bg-clip-text text-transparent">
@@ -214,7 +228,13 @@ const SmartMatches = () => {
             rankedMatches.map((user) => (
               <div key={user._id} className="space-y-2">
                 <p className="text-sm text-indigo-200">Match: {user.matchPercentage}%</p>
-                <ConnectionCard connection={user} showMatching={false} />
+                <ConnectionCard
+                  connection={user}
+                  showMatching={false}
+                  showChatButton={false}
+                  onReject={() => handleSendRequest("ignored", user._id)}
+                  onRequest={() => handleSendRequest("interested", user._id)}
+                />
               </div>
             ))
           )}
