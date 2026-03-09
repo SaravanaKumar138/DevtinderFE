@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 const ConnectionCard = ({ connection , showMatching = true}) => {
   const { firstName, lastName, photoUrl, gender, age, about, skills , matchPercentage, isPremium} = connection;
   const fullName = `${firstName || ""} ${lastName || ""}`.trim();
+  const getSkillName = (skill) =>
+    typeof skill === "string" ? skill : skill?.name || "";
 
   return (
     <div className="flex items-center gap-6 p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl hover:shadow-indigo-500/30 transition-all duration-300 hover:scale-[1.02]">
@@ -29,15 +31,24 @@ const ConnectionCard = ({ connection , showMatching = true}) => {
      
         <div>
           {skills &&
-            skills.map((s) => (
+            skills.map((s, index) => {
+              const skillName = getSkillName(s);
+              const skillKey =
+                (typeof s === "object" && s?._id) || `${skillName}-${index}`;
+
+              if (!skillName) return null;
+
+              return (
               <span
+                key={skillKey}
                 className="px-3 py-1 mr-2 rounded-full text-xs font-semibold cursor-pointer
         bg-indigo-500/20 text-indigo-300 border border-indigo-400/30
         hover:bg-red-500/20 hover:text-red-400 transition"
               >
-                {s}
+                {skillName}
               </span>
-            ))}
+              );
+            })}
         </div>
         {about && (
           <p className="mt-3 text-gray-300 text-sm leading-relaxed max-w-xl">

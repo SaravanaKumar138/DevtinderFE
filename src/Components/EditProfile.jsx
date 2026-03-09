@@ -32,14 +32,16 @@ console.log(user);
   // 🔹 CORE SKILLS
   const [primarySkill, setPrimarySkill] = useState(user.skills?.[0]?.name || "");
   const [secondarySkill, setSecondarySkill] = useState(user.skills?.[1]?.name || "");
-  const [tertiarySkill, setTertiarySkill] = useState(user.skills?.[2] || "");
+  const [tertiarySkill, setTertiarySkill] = useState(user.skills?.[2]?.name || "");
 
-  const [primaryLevel, setPrimaryLevel] = useState(user.skills?.[0].level || "beginner");
+  const [primaryLevel, setPrimaryLevel] = useState(user.skills?.[0]?.level || "beginner");
   const [secondaryLevel, setSecondaryLevel] = useState(user.skills?.[1]?.level || "beginner");
   const [tertiaryLevel, setTertiaryLevel] = useState(user.skills?.[2]?.level || "beginner");
 
   // 🔹 EXTRA SKILLS
-  const [extraSkills, setExtraSkills] = useState(user.skills?.slice(3) || []);
+  const [extraSkills, setExtraSkills] = useState(
+    user.skills?.slice(3)?.map((skill) => skill?.name).filter(Boolean) || []
+  );
   const [skillInput, setSkillInput] = useState("");
 
   const [error, setError] = useState("");
@@ -127,10 +129,15 @@ useEffect(() => {
   setExperience(user.experience ?? 0);
   setRole(user.role || "");
 
-  setPrimarySkill(user.skills?.[0] || "");
-  setSecondarySkill(user.skills?.[1] || "");
-  setTertiarySkill(user.skills?.[2] || "");
-  setExtraSkills(user.skills?.slice(3) || []);
+  setPrimarySkill(user.skills?.[0]?.name || "");
+  setSecondarySkill(user.skills?.[1]?.name || "");
+  setTertiarySkill(user.skills?.[2]?.name || "");
+  setPrimaryLevel(user.skills?.[0]?.level || "beginner");
+  setSecondaryLevel(user.skills?.[1]?.level || "beginner");
+  setTertiaryLevel(user.skills?.[2]?.level || "beginner");
+  setExtraSkills(
+    user.skills?.slice(3)?.map((skill) => skill?.name).filter(Boolean) || []
+  );
   setPhotoUrl(user.photoUrl || "");
 }, [user]);
 
@@ -269,7 +276,7 @@ useEffect(() => {
                 {/* Level dropdown */}
                 <select
                   value={levelValue}
-                  onChange={(e) => setLevel(Number(e.target.value))}
+                  onChange={(e) => setLevel(e.target.value)}
                   disabled={!value}
                   className="w-24 px-3 py-2 rounded-lg bg-black/40 border border-white/10 focus:border-indigo-400 outline-none"
                 >

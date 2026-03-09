@@ -85,7 +85,7 @@ const UserCard = ({ user }) => {
               border border-indigo-400/30
               hover:bg-indigo-500/30 transition"
                 >
-                  {skill}
+                  {skill.name}
                 </span>
                
               ))
